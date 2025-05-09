@@ -24,3 +24,17 @@ class Role(str, PyEnum):
     ADMIN = "Admin"
     DOCTOR = "Doctor"
     PATIENT = "Patient"
+
+
+
+class Specialty(str , PyEnum):
+    CARDIOLOGY = "Cardiology"
+    DERMATOLOGY = "Dermatology"
+    NEUROLOGY = "Neurology"
+    PEDIATRICS = "Pediatrics"
+    ONCOLOGY = "Oncology"
+    ORTHOPEDICS = "Orthopedics"
+    PSYCHIATRY = "Psychiatry"
+    RADIOLOGY = "Radiology"
+    GENERAL_SURGERY = "General Surgery"
+    INTERNAL_MEDICINE = "Internal Medicine"
