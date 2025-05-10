@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException
+from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
 from db.session import get_db
@@ -9,14 +10,15 @@ from typing import List
 from schemas.request import   PatientUpdate ,DiagnosisHistoryCreate , DiagnosticListCreate
 from schemas.response import PatientOut
 from schemas.authschema import PatientCreate , DoctorCreate
-from routes.auth.utlis import check_if_doctor_and_has_patient
+from routes.auth.utlis import is_doctor_for_patient
 router = APIRouter(
     prefix="/api",
     tags=["routes"]
 )
 
 
-
+def is_doctor_for_patient_placeholder():
+    return True
 
 
 @router.get("/patients/me")
@@ -53,7 +55,7 @@ def get_my_diagnosis_history(patient_id: str = Depends(get_current_patient), db:
 
 
 @router.get("/patients/{patient_id}/diagnosis-history")
-def get_diagnosis_history(patient_id: str, db: Session = Depends(get_db) , is_authz:bool=Depends(check_if_doctor_and_has_patient)):
+def get_diagnosis_history(patient_id: str, db: Session = Depends(get_db) , is_authz:bool=Depends(is_doctor_for_patient_placeholder)):
     patient = db.query(Patient).filter(Patient.id == patient_id).first()
     if not patient:
         raise HTTPException(status_code=404, detail="Patient not found")
@@ -61,8 +63,10 @@ def get_diagnosis_history(patient_id: str, db: Session = Depends(get_db) , is_au
     diagnosis_history = db.query(DiagnosisHistory).filter(DiagnosisHistory.patient_id == patient_id).all()
     return diagnosis_history
 
+
+
 @router.post("/patients/{patient_id}/diagnosis-history")
-def create_diagnosis_history(patient_id: str, diagnosis_history: DiagnosisHistoryCreate, db: Session = Depends(get_db) , is_authz:bool=Depends(check_if_doctor_and_has_patient)):
+def create_diagnosis_history(patient_id: str, diagnosis_history: DiagnosisHistoryCreate, db: Session = Depends(get_db) , is_authz:bool=Depends(is_doctor_for_patient_placeholder)):
     patient = db.query(Patient).filter(Patient.id == patient_id).first()
     if not patient:
         raise HTTPException(status_code=404, detail="Patient not found")
@@ -74,7 +78,7 @@ def create_diagnosis_history(patient_id: str, diagnosis_history: DiagnosisHistor
     return new_history
 
 @router.get("/patients/{patient_id}/diagnostic-list")
-def get_diagnostic_list(patient_id: str, db: Session = Depends(get_db) , is_authz:bool=Depends(check_if_doctor_and_has_patient)):
+def get_diagnostic_list(patient_id: str, db: Session = Depends(get_db) , is_authz:bool=Depends(is_doctor_for_patient_placeholder)):
     patient = db.query(Patient).filter(Patient.id == patient_id).first()
     if not patient:
         raise HTTPException(status_code=404, detail="Patient not found")
@@ -82,14 +86,32 @@ def get_diagnostic_list(patient_id: str, db: Session = Depends(get_db) , is_auth
     diagnostic_list = db.query(DiagnosticList).filter(DiagnosticList.patient_id == patient_id).all()
     return diagnostic_list
 
+
+
+
 @router.post("/patients/{patient_id}/diagnostic-list")
-def create_diagnostic_list(patient_id: str, diagnostic: DiagnosticListCreate, db: Session = Depends(get_db) , is_authz:bool=Depends(check_if_doctor_and_has_patient)):
+def create_diagnostic_list(patient_id:str , diagnostic:DiagnosticListCreate, db: Session = Depends(get_db) , is_authz:bool=Depends(is_doctor_for_patient_placeholder)):
+    
+    patient_id = patient_id
     patient = db.query(Patient).filter(Patient.id == patient_id).first()
     if not patient:
         raise HTTPException(status_code=404, detail="Patient not found")
-
+    
     new_diagnostic = DiagnosticList(**diagnostic.dict(), patient_id=patient_id)
     db.add(new_diagnostic)
+
     db.commit()
-    db.refresh(new_diagnostic)
+    db.refresh(new_diagnostic) 
+
     return new_diagnostic
+
+
+
+
+@router.get("/patients")
+def get_all_patients( db:Session=Depends(get_db)):
+    return db.query(Patient).all()
+
+@router.get("/doctors")
+def get_all_patients( db:Session=Depends(get_db)):
+    return db.query(Doctor).all()

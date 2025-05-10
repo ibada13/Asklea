@@ -21,9 +21,9 @@ class Gender(str, PyEnum):
     FEMALE = "Female"
 
 class Role(str, PyEnum):
-    ADMIN = "Admin"
-    DOCTOR = "Doctor"
-    PATIENT = "Patient"
+    ADMIN = "ADMIN"
+    DOCTOR = "DOCTOR"
+    PATIENT = "PATIENT"
 
 
 

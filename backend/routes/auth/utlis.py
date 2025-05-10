@@ -5,33 +5,35 @@ from schemas.authschema import UserCreate ,DoctorCreate ,PatientCreate
 from sqlalchemy.orm import Session 
 from sqlalchemy import create_pool_from_url, or_
 from models.base import User
-from models.models import Doctor ,Patient,patient_doctor_association 
+from models.models import Admin ,  Doctor ,Patient,patient_doctor_association 
 from sqlalchemy.exc import SQLAlchemyError
 from jose import jwt ,JWTError
 from models.enums import Role
 from db.session import get_db
 from config import SECRET_KEY  ,ALGORITHM
-def create_user_handler(create_user_request :UserCreate , db:Session):
+def create_admin_handler(create_user_request :UserCreate , db:Session):
     try:
-        user = db.query(User).filter(or_(User.email == create_user_request.email , User.username == create_user_request.username)).first()
-        if user:
+        admin = db.query(Admin).filter(or_(Admin.email == create_user_request.email , Admin.username == create_user_request.username)).first()
+        if admin:
             raise HTTPException(status_code=409 , detail="User with this email or username already exist")
-        created_user = User(
+        created_admin = Admin(
             username = create_user_request.username , 
             password = bcrypt_context.hash(create_user_request.password),
             email = create_user_request.email,
-            role = Role.ADMIN
         )
-        db.add(created_user)
+        db.add(created_admin)
         db.commit()
-        db.refresh(created_user)
+        db.refresh(created_admin)
     except SQLAlchemyError as e :
         db.rollback()
-        raise Exception(f"Error while creating user : {str(e)}")
+        raise Exception(f"Error while creating admin : {str(e)}")
+
+
 
 def auth_user(username:str , password :str , db:Session):
     try :
         user = db.query(User).filter(User.username == username).first()
+        print(user)
         if not user or not bcrypt_context.verify(password ,user.password) :
             raise HTTPException(status_code=401 , detail="Invalid credentials")
         return create_access_token(user=user)
@@ -39,6 +41,8 @@ def auth_user(username:str , password :str , db:Session):
     except SQLAlchemyError as e :
         raise Exception(f"Error occured while logining you in : {str(e)}")
     
+
+
 def create_access_token(user:User , expires_delta:int=20):
     encode = {"sub":user.username , "id":user.id,"role" :user.role}
     expires = datetime.now(timezone.utc)  +timedelta(minutes=expires_delta)
@@ -123,7 +127,7 @@ async def get_current_patient( token:str=Depends(oauth2_bearer)):
 
 
 
-def check_if_doctor_and_has_patient(patient_id: int, db: Session = Depends(get_db), user: User = Depends(get_current_user)) -> bool:
+def is_doctor_for_patient(patient_id: int, db: Session = Depends(get_db), user: User = Depends(get_current_user)) -> bool:
     if not user.is_doctor:
         raise HTTPException(status_code=403, detail="You must be a doctor to perform this action")
     

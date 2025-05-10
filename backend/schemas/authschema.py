@@ -10,7 +10,7 @@ class UserCreate(BaseModel):
 class DoctorCreate(UserCreate):
     specialty: Optional[Specialty]
     office_location: str
-    patients :Optional[list[int]]
+    patients :Optional[list[int]] =None 
 
 class PatientCreate(UserCreate):
     gender: Gender

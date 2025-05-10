@@ -7,10 +7,10 @@ from db.database import Base
 class Admin(User):
     __tablename__ = 'admins'
 
-    id = Column(Integer, ForeignKey('users.id'), primary_key=True)
+    id = Column(String, ForeignKey('users.id'), primary_key=True)
 
     __mapper_args__ = {
-        'polymorphic_identity': 'admin',
+        'polymorphic_identity': 'ADMIN',
     }
 
 
@@ -37,7 +37,7 @@ class Patient(User):
     doctors = relationship("Doctor", secondary=patient_doctor_association, back_populates="patients")
 
     __mapper_args__ = {
-        'polymorphic_identity': 'patient',
+        'polymorphic_identity': 'PATIENT',
     }
 
 
@@ -51,5 +51,5 @@ class Doctor(User):
     patients = relationship("Patient", secondary=patient_doctor_association, back_populates="doctors")
 
     __mapper_args__ = {
-        'polymorphic_identity': 'doctor',
+        'polymorphic_identity': 'DOCTOR',
     }

@@ -5,7 +5,7 @@ from fastapi.security import OAuth2PasswordBearer ,OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session 
 from db.session import get_db
 from schemas.authschema import UserCreate ,Token
-from .utlis import check_admin,check_current_user,create_user_handler ,auth_user ,get_current_user
+from .utlis import check_admin,check_current_user,create_admin_handler ,auth_user ,get_current_user
 authroute = APIRouter(
     prefix="/api/auth",
     tags=["auth"]
@@ -25,9 +25,9 @@ async def user(response:bool =Depends(check_current_user) ):
     return {"authenticated":True}
 
 @authroute.post("/register" ,status_code=201 )
-async def create_user(create_user_request:UserCreate,db:Session = Depends(get_db) ,is_admin:bool =Depends(check_admin) ):
+async def create_admin(create_user_request:UserCreate,db:Session = Depends(get_db) ):
     try:
-        create_user_handler(create_user_request=create_user_request ,db=db)
+        create_admin_handler(create_user_request=create_user_request ,db=db)
         return {
             "message":"User was created sucessfully"
         }
@@ -41,6 +41,7 @@ async def create_user(create_user_request:UserCreate,db:Session = Depends(get_db
 @authroute.post("/token",response_model=Token)
 async def login_by_token(form_data:OAuth2PasswordRequestForm=Depends() , db:Session =Depends(get_db)):
     try:
+        print(form_data)
         token = auth_user(form_data.username , form_data.password , db)
         return {"access_token":token,
                 "token_type":"bearer"
