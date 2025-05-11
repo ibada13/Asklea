@@ -4,7 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from routes.route.routes import router
 from routes.auth.auth import authroute
 from routes.admin.route import adminrouter
-
+from routes.doctor.api  import doctorrouter
 from db.database import Base 
 
 from models.base import DiagnosticList
@@ -23,6 +23,7 @@ app.add_middleware(
 app.include_router(router=router)
 app.include_router(router=adminrouter)
 app.include_router(router=authroute)
+app.include_router(router=doctorrouter)
 # Base.metadata.drop_all(bind=engine)
 # Base.metadata.create_all(bind=engine)
 # DiagnosticList.__table__.drop(engine)

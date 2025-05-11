@@ -123,7 +123,39 @@ async def get_current_patient( token:str=Depends(oauth2_bearer)):
         return patientId     
     except JWTError  :
         raise HTTPException(status_code=401,detail="Invalid credentials")
+
+
+async def get_current_patient(db:Session=Depends(get_db), token:str=Depends(oauth2_bearer)):
+    try:
+        payload = jwt.decode(token=token,key=SECRET_KEY ,algorithms=ALGORITHM)
+        patient_id:int = payload.get("id")
+        patient = db.query(Patient).filter(Patient.id == patient_id).first()
+        
+        if not patient:
+            raise HTTPException(status_code=401, detail="Patient not found")
+        
+        
+        return patient_id 
+    except JWTError  :
+        raise HTTPException(status_code=401,detail="Invalid credentials")
     
+
+
+async def get_current_doctor(db:Session=Depends(get_db), token:str=Depends(oauth2_bearer)):
+    try:
+        payload = jwt.decode(token=token,key=SECRET_KEY ,algorithms=ALGORITHM)
+        doctor_id:int = payload.get("id")
+        doctor = db.query(Doctor).filter(Doctor.id == doctor_id).first()
+        
+        if not doctor:
+            raise HTTPException(status_code=401, detail="Doctor not found")
+        
+        
+        return doctor_id 
+    except JWTError  :
+        raise HTTPException(status_code=401,detail="Invalid credentials")
+    
+
 
 
 

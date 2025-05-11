@@ -1,11 +1,10 @@
+'use client'
 import type { Metadata } from "next";
 import "./globals.css";
+import { Provider } from "react-redux";
 
-export const metadata: Metadata = {
-  title: "Tech Care",
-  description: "this app was made by nextjs and tailwind and chart.js",
-};
 import NavBar from "./NavBar";
+import { store } from "./state/store";
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -19,8 +18,11 @@ export default function RootLayout({
       <body
         className={` antialiased text-text p-3 bg-background flex flex-col gap-y-5`}
       >
+        <Provider store={store}>
+
         <NavBar />
         {children}
+        </Provider>
       </body>
     </html>
   );

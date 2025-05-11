@@ -6,7 +6,7 @@ import Loading from "@/app/(app)/extra/Loading";
 import Error from "@/app/(app)/extra/Error";
 import { useParams } from 'next/navigation';
 import Image from 'next/image';
-import Attach from '../../common/Attach';
+import Attach from '../../admin/common/Attach';
 
 
 interface PatientType {

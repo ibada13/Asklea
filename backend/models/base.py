@@ -49,3 +49,6 @@ class DiagnosticList(Base):
 
     patient_id = Column(String, ForeignKey('patients.id'))
     patient = relationship("Patient", back_populates="diagnostic_list")
+
+
+
