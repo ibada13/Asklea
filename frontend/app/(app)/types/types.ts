@@ -17,3 +17,22 @@ export interface DoctorType {
   email: string;
   profile_picture?: string;
 }
+
+
+export type Gender = 'MALE' | 'FEMALE' | 'OTHER';
+export type InsuranceType = 'PUBLIC' | 'PRIVATE' | 'NONE';
+
+
+
+export interface PatientInfo {
+  id: string;
+  username: string;
+  gender: Gender;
+  age?: number;
+  profile_picture?: string;
+  date_of_birth?: string;
+  phone_number?: string;
+  emergency_contact?: string;
+  insurance_type: InsuranceType;
+}
+

@@ -18,6 +18,24 @@ adminrouter = APIRouter(
 def create_doctor_profile(doctor: DoctorCreate, db: Session = Depends(get_db), is_admin: bool = Depends(check_admin_placeholder)):
     return create_doctor_handler(create_doctor_request=doctor, db=db)
 
+
+@adminrouter.get("/patients")
+def get_patients(db: Session = Depends(get_db), is_admin: bool = Depends(check_admin_placeholder)):
+    result = db.query(Patient).all()
+    patients = [{
+        "id": patient.id,
+        "username":patient.username ,
+        "gender": patient.gender,
+        "age": patient.age,
+        "profile_picture": patient.profile_picture,
+        "date_of_birth": patient.date_of_birth,
+        "phone_number": patient.phone_number,
+        "emergency_contact": patient.emergency_contact,
+        "insurance_type": patient.insurance_type
+    } for patient in result]
+    return patients
+
+
 @adminrouter.get("/doctors")
 def get_doctors(db:Session =Depends(get_db),is_admin:bool=Depends(check_admin_placeholder) ):
     result = db.query(Doctor.id, Doctor.username).all()
@@ -34,6 +52,14 @@ def get_doctor(doctor_id: str, db: Session = Depends(get_db), is_admin: bool = D
 
     return jsonable_encoder(doctor)
 
+@adminrouter.get("/patients/{patient_id}")
+def get_doctor(patient_id: str, db: Session = Depends(get_db), is_admin: bool = Depends(check_admin_placeholder)):
+    patient = db.query(Patient).filter(Patient.id == patient_id).first()
+
+    if not patient:
+        raise HTTPException(status_code=404, detail="patient not found")
+
+    return jsonable_encoder(patient)
 
 @adminrouter.post("/patients")
 def create_patient_profile(patient: PatientCreate, db: Session = Depends(get_db), is_admin: bool = Depends(check_admin_placeholder)):
@@ -54,19 +80,70 @@ def attach_patients_to_doctor(doctor_id: str, patient_ids: list[str], db: Sessio
     return attach_patients_to_doctor_handler(doctor_id=doctor_id, patient_ids=patient_ids, db=db)
 
 
-@adminrouter.get("/search_patients/{doctor_id}")
-def search_patients(
+
+
+
+@adminrouter.get("/attached_patients/{doctor_id}")
+def attached_patients(
+    doctor_id: str,
+    db: Session = Depends(get_db),
+    is_admin: bool = Depends(check_admin_placeholder)
+):
+    attached_patient_ids = db.query(patient_doctor_association.c.patient_id).filter(patient_doctor_association.c.doctor_id == doctor_id).all()
+    attached_patient_ids = [p[0] for p in attached_patient_ids]
+    attached_patients = db.query(Patient.id, Patient.username).filter(Patient.id.in_(attached_patient_ids)).all()
+    return [{"id": p.id, "username": p.username} for p in attached_patients]
+@adminrouter.get("/not_attached_patients/{doctor_id}")
+def not_attached_patients(
     doctor_id: str,
     name: str = Query(..., min_length=1),
     db: Session = Depends(get_db),
     is_admin: bool = Depends(check_admin_placeholder)
 ):
-    patients = db.query(Patient.id, Patient.username).filter(Patient.username.ilike(f"%{name}%")).all()
-    attached_patient_ids = db.query(patient_doctor_association.c.patient_id).filter(patient_doctor_association.c.doctor_id == doctor_id).all()
+    patients = db.query(Patient.id, Patient.username)\
+        .filter(Patient.username.ilike(f"%{name}%"))\
+        .all()
+    attached_patient_ids = db.query(patient_doctor_association.c.patient_id)\
+        .filter(patient_doctor_association.c.doctor_id == doctor_id)\
+        .all()
     attached_patient_ids = [p[0] for p in attached_patient_ids]
-    filtered_patients = [
+    return [
         {"id": p.id, "username": p.username}
-        for p in patients
-        if p.id not in attached_patient_ids
+        for p in patients if p.id not in attached_patient_ids
     ]
-    return filtered_patients
+
+
+@adminrouter.get("/attached_doctors/{patient_id}")
+def attached_doctors(
+    patient_id: str,
+    db: Session = Depends(get_db),
+    is_admin: bool = Depends(check_admin_placeholder)
+):
+    attached_doctor_ids = db.query(patient_doctor_association.c.doctor_id)\
+        .filter(patient_doctor_association.c.patient_id == patient_id)\
+        .all()
+    attached_doctor_ids = [d[0] for d in attached_doctor_ids]
+    doctors = db.query(Doctor.id, Doctor.username)\
+        .filter(Doctor.id.in_(attached_doctor_ids))\
+        .all()
+    return [{"id": d.id, "username": d.username} for d in doctors]
+
+
+@adminrouter.get("/not_attached_doctors/{patient_id}")
+def not_attached_doctors(
+    patient_id: str,
+    name: str = Query(..., min_length=1),
+    db: Session = Depends(get_db),
+    is_admin: bool = Depends(check_admin_placeholder)
+):
+    doctors = db.query(Doctor.id, Doctor.username)\
+        .filter(Doctor.username.ilike(f"%{name}%"))\
+        .all()
+    attached_doctor_ids = db.query(patient_doctor_association.c.doctor_id)\
+        .filter(patient_doctor_association.c.patient_id == patient_id)\
+        .all()
+    attached_doctor_ids = [d[0] for d in attached_doctor_ids]
+    return [
+        {"id": d.id, "username": d.username}
+        for d in doctors if d.id not in attached_doctor_ids
+    ]
