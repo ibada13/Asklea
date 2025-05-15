@@ -38,3 +38,9 @@ class Specialty(str , PyEnum):
     RADIOLOGY = "Radiology"
     GENERAL_SURGERY = "General Surgery"
     INTERNAL_MEDICINE = "Internal Medicine"
+
+
+class DiagnosticStatus(str, PyEnum):
+    PENDING = "pending"
+    IN_PROGRESS = "in-progress"
+    RESOLVED = "resolved"

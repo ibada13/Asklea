@@ -9,7 +9,7 @@ from models.base import DiagnosisHistory , DiagnosticList
 
 from routes.auth.utlis import get_current_doctor
 
-from .schemas.request import DiagnosisHistoryRequest
+from .schemas.request import DiagnosisHistoryRequest , DiagnosticListRequest
 
 def is_doctor_for_patient_placeholder():
     return True
@@ -78,6 +78,32 @@ async def create_diagnosis_history(data: DiagnosisHistoryRequest ,patient_id:str
         db.commit()
         db.refresh(diagnosis)
         return {"message": "Diagnostic posted successfully", "id": diagnosis.id}
-    except Exception:
+    except Exception as e :
         db.rollback()
-        return {"error": "Failed to post diagnostic"}
+        raise HTTPException(status_code=404 , detail=f"Failed to post diagnostic {str(e)}")
+
+
+
+
+@doctorrouter.post("/{patient_id}/diagnosticlist")
+def create_diagnostic_list_item(
+    patient_id: str,
+    diagnostic: DiagnosticListRequest,
+    db: Session = Depends(get_db),
+):
+    try:
+        diagnosis = DiagnosticList(
+            name=diagnostic.name, 
+            description=diagnostic.description,
+            status=diagnostic.status,
+            patient_id=patient_id,
+        )
+        db.add(diagnosis)
+        db.commit()
+        db.refresh(diagnosis)
+        return {"message": "Diagnostic posted successfully", "id": diagnosis.id}
+
+    
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=404 , detail=f"Failed to post diagnostic {str(e)}")

@@ -1,6 +1,6 @@
 from pydantic import BaseModel, conint, confloat
 from typing import Literal
-
+from models.enums import DiagnosticStatus
 Level = Literal["Low", "Normal", "High", "Lower than Average", "Higher than Average"]
 
 class DiagnosisHistoryRequest(BaseModel):
@@ -16,3 +16,9 @@ class DiagnosisHistoryRequest(BaseModel):
     respiratory_rate_levels: Level
     temperature_value: float
     temperature_levels: Level
+
+
+class DiagnosticListRequest(BaseModel):
+    name:str
+    description: str | None = None
+    status: DiagnosticStatus

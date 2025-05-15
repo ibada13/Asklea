@@ -10,12 +10,13 @@ import DiagnosisForm from './Lib/ui/DiagnosisForm'
 import { get } from '@/app/lib/utlis'
 import TextPlaceHolder from '../extra/TextPlaceHolder'
 import { useRouter } from 'next/navigation'
+import DiagnosticListForm from './Lib/ui/Diagnosislistform'
 export default function CenterBarWrapper({ id }: { id?: string | null }) {
   const { data: diagnostics, isLoading, error } = useSWR(
     id ? `/doctor/my-patients/${id}/diagnostics` : null,
     get
   )
-  const router = useRouter();
+  const router = useRouter()
   const searchParams = useSearchParams()
   const msg = searchParams.get('msg')
   const [showMsg, setShowMsg] = useState(!!msg)
@@ -93,7 +94,7 @@ function CenterBar({
   id: string
 }) {
   const [showForm, setShowForm] = useState(false)
-
+  const [showListForm, setShowListForm] = useState(false);
   return (
     <>
       <div className="flex flex-col w-1/2 gap-y-4">
@@ -113,7 +114,19 @@ function CenterBar({
             <HealthCard diagnosis_history={diagnosis_history[0]} />
           </div>
         </div>
+
+        {/* + button above the diagnostic list */}
+        <div className="flex flex-col justify-end mb-2 bg-white py-3 px-1 rounded-md">
+          <button
+            onClick={() => setShowListForm(true)}
+            className="text-xl self-end font-bold px-3 rounded hover:bg-gray-200"
+            title="Add new diagnosis"
+          >
+            +
+          </button>
+
         <DiagnosisList diagnostic_list={diagnostic_list} />
+        </div>
       </div>
 
       {showForm && (
@@ -126,6 +139,20 @@ function CenterBar({
             onClick={(e) => e.stopPropagation()}
           >
             <DiagnosisForm patient_id={id} onCloseAction={() => setShowForm(false)} />
+          </div>
+        </div>
+      )}
+
+            {showListForm && (
+        <div
+          className="p-12 fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50"
+          onClick={() => setShowListForm(false)}
+        >
+          <div
+            className="bg-white p-6 rounded shadow-lg max-w-xl w-full"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <DiagnosticListForm patient_id={id} onCloseAction={() => setShowListForm(false)} />
           </div>
         </div>
       )}

@@ -1,6 +1,8 @@
 'use client';
 import { useState } from 'react';
 import useSWR from 'swr';
+import useSWRImmutable from 'swr/immutable';
+
 import { useDebounce } from 'use-debounce';
 import { IoSearch } from 'react-icons/io5';
 import { IoMdClose } from 'react-icons/io';
@@ -13,7 +15,7 @@ const LeftBar = ({ selected }: { selected?: string }) => {
   const [query, setQuery] = useState('');
   const [debounced] = useDebounce(query, 300);
 
-  const { data, error, isLoading } = useSWR(
+  const { data, error, isLoading } = useSWRImmutable(
     debounced ? `/doctor/my-patients?name=${debounced}` : '/doctor/my-patients',
     getPrivliged,
     { keepPreviousData: true }
