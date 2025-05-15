@@ -22,8 +22,8 @@ export const login = createAsyncThunk(
     if (typeof window !== 'undefined') {
       localStorage.setItem('token', response.data.access_token);
     }
-    
-    return response.data;
+
+    return response.data; // must include `role` in backend response
   }
 );
 
@@ -50,15 +50,15 @@ export const checkUser = createAsyncThunk('auth/checkUser', async () => {
   const token = getTokenFromLocalStorage();
   if (token) {
     try {
-      await axios.get('/auth/check', {
+      const response = await axios.get('/auth/check', {
         headers: { Authorization: `Bearer ${token}` },
       });
-      return true;
+      return response.data;
     } catch (error) {
-      return false;
+      return null;
     }
   }
-  return false;
+  return null;
 });
 
 export const getUser = createAsyncThunk('auth/getUser', async () => {
@@ -104,9 +104,36 @@ const authSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      .addCase(login.fulfilled, (state) => {})
-      .addCase(register.fulfilled, (state) => {})
-      .addCase(checkUser.fulfilled, (state, action) => {})
+      .addCase(login.fulfilled, (state, action) => {
+        state.user = action.payload;
+
+        const role: string = action.payload?.role;
+        console.log('Login role:', role);
+
+        state.isPatient = role?.toLowerCase() === 'patient';
+        state.isDoctor = role?.toLowerCase() === 'doctor';
+        state.isAdmin = role?.toLowerCase() === 'admin';
+      })
+      .addCase(register.fulfilled, (state, action) => {
+        state.user = action.payload;
+
+        const role: string = action.payload?.role;
+        console.log('Register role:', role);
+
+        state.isPatient = role?.toLowerCase() === 'patient';
+        state.isDoctor = role?.toLowerCase() === 'doctor';
+        state.isAdmin = role?.toLowerCase() === 'admin';
+      })
+      .addCase(checkUser.fulfilled, (state, action) => {
+        state.user = action.payload;
+
+        const role: string = action.payload?.role;
+        console.log('Check role:', role);
+
+        state.isPatient = role?.toLowerCase() === 'patient';
+        state.isDoctor = role?.toLowerCase() === 'doctor';
+        state.isAdmin = role?.toLowerCase() === 'admin';
+      })
       .addCase(checkUser.rejected, (state) => {
         state.isPatient = false;
         state.isDoctor = false;
@@ -116,11 +143,12 @@ const authSlice = createSlice({
       .addCase(getUser.fulfilled, (state, action) => {
         state.user = action.payload;
 
-        const role = action.payload?.role;
+        const role: string = action.payload?.role;
+        console.log('User role:', role);
 
-        state.isPatient = role === 'patient';
-        state.isDoctor = role === 'doctor';
-        state.isAdmin = role === 'admin';
+        state.isPatient = role?.toLowerCase() === 'patient';
+        state.isDoctor = role?.toLowerCase() === 'doctor';
+        state.isAdmin = role?.toLowerCase() === 'admin';
       });
   },
 });

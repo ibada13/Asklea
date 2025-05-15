@@ -1,37 +1,134 @@
 'use client'
+
+import { useEffect, useState } from 'react'
+import { useSearchParams } from 'next/navigation'
 import useSWR from 'swr'
 import ChartCard from './Lib/ui/chartcard'
 import HealthCard from './Lib/ui/healthcard'
 import DiagnosisList from './Lib/ui/diagnosisList'
+import DiagnosisForm from './Lib/ui/DiagnosisForm'
 import { get } from '@/app/lib/utlis'
-import Loading from '@/app/(app)/extra/Loading'
-import Error from '@/app/(app)/extra/Error'
-
+import TextPlaceHolder from '../extra/TextPlaceHolder'
+import { useRouter } from 'next/navigation'
 export default function CenterBarWrapper({ id }: { id?: string | null }) {
   const { data: diagnostics, isLoading, error } = useSWR(
-    id ? `/doctor/my-patients/${id}/diagnostics` : null, 
+    id ? `/doctor/my-patients/${id}/diagnostics` : null,
     get
   )
+  const router = useRouter();
+  const searchParams = useSearchParams()
+  const msg = searchParams.get('msg')
+  const [showMsg, setShowMsg] = useState(!!msg)
 
-  if (!id) return <div>No patient selected.</div> // You can change this to whatever message you want when id is null
+  useEffect(() => {
+    if (msg) {
+      setShowMsg(true)
+      const timeout = setTimeout(() => {
+        setShowMsg(false)
+        router.replace(location.pathname)
+      }, 5000)
+      return () => clearTimeout(timeout)
+    }
+  }, [msg])
 
-  if (isLoading) return <Loading />
-  if (error || !diagnostics) return <Error />
+  if (!id) {
+    return (
+      <TextPlaceHolder
+        className="w-1/2 flex justify-center font-bold"
+        text="No patient selected."
+      />
+    )
+  }
 
-  return <CenterBar diagnosis_history={diagnostics.diagnosis_history} diagnostic_list={diagnostics.diagnostic_list} />
+  if (isLoading) {
+    return (
+      <TextPlaceHolder
+        className="w-1/2 flex justify-center font-bold text-sg"
+        text="Loading..."
+      />
+    )
+  }
+
+  if (error) {
+    return (
+      <TextPlaceHolder
+        className="w-1/2 flex justify-center font-bold text-red-500"
+        text="Error."
+      />
+    )
+  }
+
+  if (!diagnostics) {
+    return (
+      <TextPlaceHolder
+        className="w-1/2 flex justify-center font-bold text-sg"
+        text="No results"
+      />
+    )
+  }
+
+  return (
+    <>
+      {showMsg && (
+        <div className="fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded shadow z-50">
+          {msg}
+        </div>
+      )}
+      <CenterBar
+        id={id}
+        diagnosis_history={diagnostics.diagnosis_history}
+        diagnostic_list={diagnostics.diagnostic_list}
+      />
+    </>
+  )
 }
 
-function CenterBar({ diagnosis_history, diagnostic_list }: { diagnosis_history: any[]; diagnostic_list: any[] }) {
+function CenterBar({
+  diagnosis_history,
+  diagnostic_list,
+  id
+}: {
+  diagnosis_history: any[]
+  diagnostic_list: any[]
+  id: string
+}) {
+  const [showForm, setShowForm] = useState(false)
+
   return (
-    <div className="flex flex-col w-1/2 gap-y-4">
-      <div className="flex flex-col bg-white w-full p-2 rounded-lg">
-        <p className="font-bold">Diagnostic</p>
-        <div className="h-screen flex flex-col justify-around bg-white">
-          <ChartCard diagnosis_history={diagnosis_history} />
-          <HealthCard diagnosis_history={diagnosis_history[0]} />
+    <>
+      <div className="flex flex-col w-1/2 gap-y-4">
+        <div className="flex flex-col bg-white w-full p-2 rounded-lg">
+          <div className="flex justify-between items-center mb-2">
+            <p className="font-bold">Diagnostic</p>
+            <button
+              onClick={() => setShowForm(true)}
+              className="text-xl font-bold px-3 rounded hover:bg-gray-200"
+              title="Add new diagnosis"
+            >
+              +
+            </button>
+          </div>
+          <div className="h-screen flex flex-col justify-around bg-white">
+            <ChartCard diagnosis_history={diagnosis_history} />
+            <HealthCard diagnosis_history={diagnosis_history[0]} />
+          </div>
         </div>
+        <DiagnosisList diagnostic_list={diagnostic_list} />
       </div>
-      <DiagnosisList diagnostic_list={diagnostic_list} />
-    </div>
+
+      {showForm && (
+        <div
+          className="p-12 fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50"
+          onClick={() => setShowForm(false)}
+        >
+          <div
+            className="bg-white p-6 rounded shadow-lg max-w-xl w-full"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <DiagnosisForm patient_id={id} onCloseAction={() => setShowForm(false)} />
+          </div>
+        </div>
+      )}
+    </>
   )
 }

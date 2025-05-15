@@ -9,6 +9,7 @@ from models.base import DiagnosisHistory , DiagnosticList
 
 from routes.auth.utlis import get_current_doctor
 
+from .schemas.request import DiagnosisHistoryRequest
 
 def is_doctor_for_patient_placeholder():
     return True
@@ -53,3 +54,30 @@ def get_patient_diagnostics(
         "diagnosis_history": diagnosis_history,
         "diagnostic_list": diagnostic_list
     }
+
+
+@doctorrouter.post("/{patient_id}/diagnosishistory")
+async def create_diagnosis_history(data: DiagnosisHistoryRequest ,patient_id:str , db:Session=Depends(get_db) ,is_doctor:bool =Depends(is_doctor_for_patient_placeholder) ):
+    try:
+        diagnosis = DiagnosisHistory(
+            month=data.month,
+            year=data.year,
+            blood_pressure_systolic_value=data.blood_pressure_systolic_value,
+            blood_pressure_systolic_levels=data.blood_pressure_systolic_levels,
+            blood_pressure_diastolic_value=data.blood_pressure_diastolic_value,
+            blood_pressure_diastolic_levels=data.blood_pressure_diastolic_levels,
+            heart_rate_value=data.heart_rate_value,
+            heart_rate_levels=data.heart_rate_levels,
+            respiratory_rate_value=data.respiratory_rate_value,
+            respiratory_rate_levels=data.respiratory_rate_levels,
+            temperature_value=int(data.temperature_value),
+            temperature_levels=data.temperature_levels,
+            patient_id=patient_id,
+        )
+        db.add(diagnosis)
+        db.commit()
+        db.refresh(diagnosis)
+        return {"message": "Diagnostic posted successfully", "id": diagnosis.id}
+    except Exception:
+        db.rollback()
+        return {"error": "Failed to post diagnostic"}

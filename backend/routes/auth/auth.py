@@ -2,6 +2,7 @@ from fastapi import APIRouter ,Depends ,HTTPException
 from passlib.context import CryptContext
 from fastapi.security import OAuth2PasswordBearer ,OAuth2PasswordRequestForm
 
+from pydantic import BaseModel
 from sqlalchemy.orm import Session 
 from db.session import get_db
 from schemas.authschema import UserCreate ,Token
@@ -11,12 +12,15 @@ authroute = APIRouter(
     tags=["auth"]
 )
 
-
+class SimpleUser(BaseModel):
+    username:str 
+    id:str 
+    role :str
 @authroute.get("/" , status_code=200)
-async def user(user:dict =Depends(get_current_user) ):
+async def user(user:SimpleUser =Depends(get_current_user) ):
     if user is None:
         raise  HTTPException(status_code=401 , detail="Authenticstion Failed")
-    return {"user":user}
+    return user
 
 @authroute.get("/check" , status_code=200 )
 async def user(response:bool =Depends(check_current_user) ):
@@ -42,9 +46,10 @@ async def create_admin(create_user_request:UserCreate,db:Session = Depends(get_d
 async def login_by_token(form_data:OAuth2PasswordRequestForm=Depends() , db:Session =Depends(get_db)):
     try:
         print(form_data)
-        token = auth_user(form_data.username , form_data.password , db)
+        token , role= auth_user(form_data.username , form_data.password , db)
         return {"access_token":token,
-                "token_type":"bearer"
+                "token_type":"bearer",
+                "role":role ,
                 }    
     except HTTPException :
         raise

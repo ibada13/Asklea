@@ -36,7 +36,9 @@ def auth_user(username:str , password :str , db:Session):
         print(user)
         if not user or not bcrypt_context.verify(password ,user.password) :
             raise HTTPException(status_code=401 , detail="Invalid credentials")
-        return create_access_token(user=user)
+        token = create_access_token(user=user)
+        return token,user.role
+
 
     except SQLAlchemyError as e :
         raise Exception(f"Error occured while logining you in : {str(e)}")
@@ -51,14 +53,19 @@ def create_access_token(user:User , expires_delta:int=20):
 
 
 
-async def get_current_user(token :str =Depends(oauth2_bearer) ):
+async def get_current_user(db:Session = Depends(get_db) , token :str =Depends(oauth2_bearer) ):
     try:
         payload = jwt.decode(token=token,key=SECRET_KEY ,algorithms=ALGORITHM)
         username :str = payload.get("sub")
         userid:int = payload.get("id")
+
         if username is None or userid is None :
             raise HTTPException(status_code=401 , detail="Invalid credentials")
-        return {"username":username , "id":userid}
+        user =db.query(User).filter(User.id == userid).first()
+        if not user :
+            raise HTTPException(status_code=404 , detail="User was not found")
+        print(user)
+        return {"username":user.username , "id":user.id , "role":user.role }
     
     except JWTError  :
         raise HTTPException(status_code=401,detail="Invalid credentials")
@@ -71,7 +78,6 @@ async def check_current_user(token :str =Depends(oauth2_bearer) ):
         if username is None or userid is None :
             raise HTTPException(status_code=401 , detail="Invalid credentials")
         return True
-    
     except JWTError  :
         raise HTTPException(status_code=401,detail="Invalid credentials")    
     return False

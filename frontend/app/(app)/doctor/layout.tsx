@@ -5,13 +5,21 @@ import { useAuth } from '@/app/hooks/auth'
 
 const Layout = ({ children }: { children: React.ReactNode }) => {
   const router = useRouter()
-  const { isDoctor, loading } = useAuth()
+  const { isDoctor ,isAuth, loading ,getUser  } = useAuth()
 
-  useEffect(() => {
-    if (!loading && !isDoctor && false) {
-      router.push('/not-authorized')
+ useEffect(() => {
+  getUser(); 
+}, []);
+
+useEffect(() => {
+  if (!loading) {
+    if (!isAuth) {
+      router.push('/login');
+    } else if (!isDoctor) {
+      router.push('/not-authorized');
     }
-  }, [isDoctor, loading, router])
+  }
+}, [isDoctor, isAuth, loading, router]);
 
   if (loading) {
     return <div>Loading...</div>

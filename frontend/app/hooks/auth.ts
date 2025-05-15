@@ -9,7 +9,8 @@ export const useAuth = () => {
   return {
     isAdmin,
     isDoctor,
-    isPatient ,
+    isPatient,
+    isAuth : isAdmin || isDoctor || isPatient ,
     user,
     loading,
     login: (email: string, password: string) => dispatch(login({ email, password })),

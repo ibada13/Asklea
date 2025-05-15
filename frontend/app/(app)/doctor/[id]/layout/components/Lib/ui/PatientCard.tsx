@@ -6,16 +6,9 @@ import { BsTelephone } from "react-icons/bs"
 import Image from "next/image"
 import { convertDate } from "../functions"
 import { IoShieldCheckmarkOutline } from "react-icons/io5"
-import useSWR from "swr"
-import { get } from "@/app/lib/utlis"
-import Loading from "@/app/(app)/extra/Loading"
-import Error from "@/app/(app)/extra/Error"
 
-export default function PatientCard({ id }: { id: string }) {
-  const { data: patient, isLoading, error } = useSWR(`/doctor/my-patient/${id}`, get)
+export default function PatientCard({ patient }: { patient: any }) {
 
-  if (isLoading) return <Loading />
-  if (error || !patient) return <Error />
 
   return (
     <div className="w-full bg-white flex flex-col gap-y-4 p-2 rounded-lg">
