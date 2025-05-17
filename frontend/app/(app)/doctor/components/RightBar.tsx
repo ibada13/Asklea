@@ -1,8 +1,9 @@
 'use client'
 import { patient } from "./Lib/defintions";
-import LabResultes from "./Lib/ui/LabResultes";
-import PatientCard from "./Lib/ui/PatientCard";
-import TextPlaceHolder from "../extra/TextPlaceHolder";
+import LabResultes from "../../ui/LabResultes";
+import PatientCard from "../../ui/PatientCard";
+
+import TextPlaceHolder from "../[id]/layout/extra/TextPlaceHolder";
 import useSWR  from "swr";
 import { getPrivliged } from "@/app/lib/utlis";
 export default function RightBar({ id }: { id?: string }) { 

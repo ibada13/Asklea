@@ -1,4 +1,4 @@
-import { diagnosis_history } from "../defintions";
+import { diagnosis_history } from "../components/Lib/defintions";
 import {
     Chart as ChartJS,
     CategoryScale,

@@ -3,16 +3,17 @@
 import { useEffect, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import useSWR from 'swr'
-import ChartCard from './Lib/ui/chartcard'
-import HealthCard from './Lib/ui/healthcard'
-import DiagnosisList from './Lib/ui/diagnosisList'
-import DiagnosisForm from './Lib/ui/DiagnosisForm'
+
 import { get } from '@/app/lib/utlis'
-import TextPlaceHolder from '../extra/TextPlaceHolder'
 import { useRouter } from 'next/navigation'
-import DiagnosticListForm from './Lib/ui/Diagnosislistform'
+import TextPlaceHolder from '../[id]/layout/extra/TextPlaceHolder'
+import ChartCard from '../../ui/chartcard'
+import HealthCard from '../../ui/healthcard'
+import DiagnosisList from '../../ui/diagnosisList'
+import DiagnosisForm from '../../ui/DiagnosisForm'
+import DiagnosticListForm from '../../ui/Diagnosislistform'
 export default function CenterBarWrapper({ id }: { id?: string | null }) {
-  const { data: diagnostics, isLoading, error } = useSWR(
+  const { data: diagnostics, isLoading, error ,mutate } = useSWR(
     id ? `/doctor/my-patients/${id}/diagnostics` : null,
     get
   )
@@ -23,10 +24,11 @@ export default function CenterBarWrapper({ id }: { id?: string | null }) {
 
   useEffect(() => {
     if (msg) {
+       mutate();
       setShowMsg(true)
       const timeout = setTimeout(() => {
         setShowMsg(false)
-        router.replace(location.pathname)
+        router.replace(location.pathname, {scroll:false})
       }, 5000)
       return () => clearTimeout(timeout)
     }

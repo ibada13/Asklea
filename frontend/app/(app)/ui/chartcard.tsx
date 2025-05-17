@@ -1,4 +1,4 @@
-import { diagnosis_history } from "../defintions";
+import { diagnosis_history } from "../components/Lib/defintions";
 import { IoMdArrowDropdown } from "react-icons/io";
 import { IoMdArrowDropup } from "react-icons/io";
 import React, { useState } from "react";

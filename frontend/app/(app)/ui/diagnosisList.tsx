@@ -1,4 +1,4 @@
-import {diagnostic_list} from '../defintions'
+import {diagnostic_list} from '../components/Lib/defintions'
 const DiagnosisList = ({ diagnostic_list}: {diagnostic_list:diagnostic_list[]}) => { 
     return (
         <div className="bg-white w-full flex flex-col justify-between gap-y-3 p-2 h-[40vh] rounded-md">

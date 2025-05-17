@@ -32,7 +32,7 @@ export default function DiagnosticListForm({
     e.preventDefault();
     try {
       await post(`/doctor/${patient_id}/diagnosticlist`, formData);
-      router.replace(window.location.pathname + "?msg=Diagnostic saved successfully");
+      router.replace(window.location.pathname + "?msg=Diagnostic saved successfully", {scroll:false});
       onCloseAction();
     } catch {
       //

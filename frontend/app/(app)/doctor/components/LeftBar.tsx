@@ -6,8 +6,8 @@ import useSWRImmutable from 'swr/immutable';
 import { useDebounce } from 'use-debounce';
 import { IoSearch } from 'react-icons/io5';
 import { IoMdClose } from 'react-icons/io';
-import PatientForList from './Lib/ui/patientsforlist';
-import { PatientforListType } from '../../../types/types';
+import PatientForList from '../../ui/patientsforlist';
+import { PatientforListType } from '../types/types';
 import { getPrivliged } from '@/app/lib/utlis';
 
 const LeftBar = ({ selected }: { selected?: string }) => {

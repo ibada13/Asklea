@@ -1,10 +1,10 @@
 'use client'
-import { patient } from "../defintions"
+import { patient } from "../doctor/components/Lib/defintions"
 import { CgGenderFemale, CgGenderMale } from "react-icons/cg"
 import { CiCalendar } from "react-icons/ci"
 import { BsTelephone } from "react-icons/bs"
 import Image from "next/image"
-import { convertDate } from "../functions"
+import { convertDate } from "../doctor/components/Lib/functions"
 import { IoShieldCheckmarkOutline } from "react-icons/io5"
 
 export default function PatientCard({ patient }: { patient: any }) {

@@ -14,16 +14,13 @@ export const login = createAsyncThunk(
     const params = new URLSearchParams();
     params.append('username', email);
     params.append('password', password);
-
     const response = await axios.post('/auth/token', params, {
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     });
-
     if (typeof window !== 'undefined') {
       localStorage.setItem('token', response.data.access_token);
     }
-
-    return response.data; // must include `role` in backend response
+    return response.data;
   }
 );
 
@@ -31,17 +28,11 @@ export const register = createAsyncThunk(
   'auth/register',
   async ({ username, email, password }: { username: string; email: string; password: string }) => {
     const token = getTokenFromLocalStorage();
-
     const response = await axios.post(
       '/auth/register',
       { username, email, password },
-      {
-        headers: {
-          Authorization: token ? `Bearer ${token}` : '',
-        },
-      }
+      { headers: { Authorization: token ? `Bearer ${token}` : '' } }
     );
-
     return response.data;
   }
 );
@@ -54,7 +45,7 @@ export const checkUser = createAsyncThunk('auth/checkUser', async () => {
         headers: { Authorization: `Bearer ${token}` },
       });
       return response.data;
-    } catch (error) {
+    } catch {
       return null;
     }
   }
@@ -100,55 +91,71 @@ const authSlice = createSlice({
       state.isPatient = false;
       state.isDoctor = false;
       state.isAdmin = false;
+      state.loading = false;
     },
   },
   extraReducers: (builder) => {
     builder
+      .addCase(login.pending, (state) => { state.loading = true; })
       .addCase(login.fulfilled, (state, action) => {
+        state.loading = false;
         state.user = action.payload;
-
-        const role: string = action.payload?.role;
-        console.log('Login role:', role);
-
-        state.isPatient = role?.toLowerCase() === 'patient';
-        state.isDoctor = role?.toLowerCase() === 'doctor';
-        state.isAdmin = role?.toLowerCase() === 'admin';
+        const role = action.payload?.role?.toLowerCase();
+        state.isPatient = role === 'patient';
+        state.isDoctor = role === 'doctor';
+        state.isAdmin = role === 'admin';
       })
+      .addCase(login.rejected, (state) => {
+        state.loading = false;
+        state.user = null;
+      })
+
+      .addCase(register.pending, (state) => { state.loading = true; })
       .addCase(register.fulfilled, (state, action) => {
+        state.loading = false;
         state.user = action.payload;
-
-        const role: string = action.payload?.role;
-        console.log('Register role:', role);
-
-        state.isPatient = role?.toLowerCase() === 'patient';
-        state.isDoctor = role?.toLowerCase() === 'doctor';
-        state.isAdmin = role?.toLowerCase() === 'admin';
+        const role = action.payload?.role?.toLowerCase();
+        state.isPatient = role === 'patient';
+        state.isDoctor = role === 'doctor';
+        state.isAdmin = role === 'admin';
       })
-      .addCase(checkUser.fulfilled, (state, action) => {
+      .addCase(register.rejected, (state) => {
+        state.loading = false;
+        state.user = null;
+      })
+
+      .addCase(getUser.pending, (state) => { state.loading = true; })
+      .addCase(getUser.fulfilled, (state, action) => {
+        state.loading = false;
         state.user = action.payload;
-
-        const role: string = action.payload?.role;
-        console.log('Check role:', role);
-
-        state.isPatient = role?.toLowerCase() === 'patient';
-        state.isDoctor = role?.toLowerCase() === 'doctor';
-        state.isAdmin = role?.toLowerCase() === 'admin';
+        const role = action.payload?.role?.toLowerCase();
+        state.isPatient = role === 'patient';
+        state.isDoctor = role === 'doctor';
+        state.isAdmin = role === 'admin';
       })
-      .addCase(checkUser.rejected, (state) => {
+      .addCase(getUser.rejected, (state) => {
+        state.loading = false;
+        state.user = null;
         state.isPatient = false;
         state.isDoctor = false;
         state.isAdmin = false;
-        state.user = null;
       })
-      .addCase(getUser.fulfilled, (state, action) => {
+
+      .addCase(checkUser.pending, (state) => { state.loading = true; })
+      .addCase(checkUser.fulfilled, (state, action) => {
+        state.loading = false;
         state.user = action.payload;
-
-        const role: string = action.payload?.role;
-        console.log('User role:', role);
-
-        state.isPatient = role?.toLowerCase() === 'patient';
-        state.isDoctor = role?.toLowerCase() === 'doctor';
-        state.isAdmin = role?.toLowerCase() === 'admin';
+        const role = action.payload?.role?.toLowerCase();
+        state.isPatient = role === 'patient';
+        state.isDoctor = role === 'doctor';
+        state.isAdmin = role === 'admin';
+      })
+      .addCase(checkUser.rejected, (state) => {
+        state.loading = false;
+        state.user = null;
+        state.isPatient = false;
+        state.isDoctor = false;
+        state.isAdmin = false;
       });
   },
 });

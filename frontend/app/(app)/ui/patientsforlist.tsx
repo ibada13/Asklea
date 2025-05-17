@@ -1,4 +1,4 @@
-import { patient } from "../defintions";
+import { patient } from "../components/Lib/defintions";
 import { BsThreeDotsVertical } from "react-icons/bs";
 import Image from "next/image";
 import Link from "next/link";

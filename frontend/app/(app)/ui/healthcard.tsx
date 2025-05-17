@@ -1,8 +1,8 @@
-import temp from '../../assets/temperature.svg'
-import heart from '../../assets/HeartBPM.svg'
-import respo from '../../assets/respiratory rate.svg'
+import temp from './assets/temperature.svg'
+import heart from './assets/HeartBPM.svg'
+import respo from './assets/respiratory rate.svg'
 import Image from 'next/image'
-import { diagnosis_history } from '../defintions'
+import { diagnosis_history } from '../doctor/components/Lib/defintions'
 import { IoMdArrowDropdown } from "react-icons/io";
 import { IoMdArrowDropup } from "react-icons/io";
 

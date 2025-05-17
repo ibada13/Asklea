@@ -1,7 +1,7 @@
 'use client';
-import CenterBar from "./layout/components/CenterBar";
-import LeftBar from "./layout/components/LeftBar";
-import RightBar from "./layout/components/RightBar";
+import CenterBar from "../../components/CenterBar";
+import LeftBar from "../../components/LeftBar";
+import RightBar from "../../components/RightBar";
 
 
 export default function Page({ params }: { params: { id: string } }) { 

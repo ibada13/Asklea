@@ -1,40 +1,51 @@
 'use client'
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/app/hooks/auth';
 
 const LoginPage = () => {
-  const { login, loading, isDoctor, isAdmin, isPatient, getUser } = useAuth();
+  const { login, isAuth, loading, isDoctor, isAdmin, isPatient, getUser } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirect = searchParams.get('redirect');
 
-useEffect(() => {
-  if (isDoctor) {
-    router.push('/doctor');
-  } else if (isAdmin) {
-    router.push('/admin');
-  } else if (isPatient) {
-    router.push('/patient');
-  }
-}, [isDoctor, isAdmin, isPatient, router]);
+  useEffect(() => {
+    getUser(); 
+  }, []);
 
-useEffect(() => {
-  getUser(); 
-}, []);
+  useEffect(() => {
+    if (isAuth) {
+      if (redirect) {
+        router.push(redirect);
+      } else if (isDoctor) {
+        router.push('/doctor');
+      } else if (isAdmin) {
+        router.push('/admin');
+      } else if (isPatient) {
+        router.push('/patient');
+      }
+    }
+  }, [isDoctor, isAdmin, isPatient, redirect, router]);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     login(email, password).then(() => {
-      if (isDoctor) {
-        router.push('/doctor-dashboard');
+      if (redirect) {
+        router.push(redirect);
+      } else if (isDoctor) {
+        router.push('/doctor');
       } else if (isAdmin) {
-        router.push('/admin-dashboard');
+        router.push('/admin');
       } else if (isPatient) {
-        router.push('/patient-dashboard');
+        router.push('/patient');
       }
     });
   };
-  if (loading ) return null 
+
+  if (loading) return null;
+
   return (
     <div>
       <h2>Login</h2>

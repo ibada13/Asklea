@@ -1,4 +1,4 @@
-import { patient } from "../defintions";
+import { patient } from "../components/Lib/defintions";
 import { MdDownload } from "react-icons/md";
 
 const LabResultes = ({ patient }: {patient:patient}) => { 
