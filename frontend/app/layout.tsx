@@ -20,7 +20,7 @@ export default function RootLayout({
       >
         <Provider store={store}>
 
-        <NavBar />
+        {/* <NavBar /> */}
         {children}
         </Provider>
       </body>

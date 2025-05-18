@@ -37,6 +37,30 @@ export async function getPrivliged(route: string) {
     }
   }
 
+
+export async function deletePrivileged(route: string) {
+  try {
+    const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+    const response = await axios.delete(route, {
+      headers: {
+        Authorization: token ? `Bearer ${token}` : '',
+      },
+    });
+    return response.data;
+  } catch (error: any) {
+    if (Gaxios.isAxiosError(error)) {
+      if (error.response?.status === 401) {
+        console.warn("Unauthorized - user needs to log in");
+        return null;
+      } else {
+        console.error("API error:", error.response?.status, error.message);
+      }
+    } else {
+      console.error("Unexpected error:", error);
+    }
+    return null;
+  }
+}
 export async function getAdmin(route: string) {
     try {
       const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;

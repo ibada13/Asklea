@@ -6,7 +6,7 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session 
 from db.session import get_db
 from schemas.authschema import UserCreate ,Token
-from .utlis import check_admin,check_current_user,create_admin_handler ,auth_user ,get_current_user
+from .utlis import check_admin,check_current_user,create_admin_handler ,auth_user ,get_current_user , refresh_token
 authroute = APIRouter(
     prefix="/api/auth",
     tags=["auth"]
@@ -16,6 +16,7 @@ class SimpleUser(BaseModel):
     username:str 
     id:str 
     role :str
+
 @authroute.get("/" , status_code=200)
 async def user(user:SimpleUser =Depends(get_current_user) ):
     if user is None:
@@ -55,3 +56,8 @@ async def login_by_token(form_data:OAuth2PasswordRequestForm=Depends() , db:Sess
         raise
     except Exception as e :
         raise HTTPException(status_code=500 , detail=f"Error occured {str(e)}")
+
+
+@authroute.post("/refresh-token")
+async def refresh_access_token( ):
+    return refresh_token()

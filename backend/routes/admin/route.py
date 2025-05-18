@@ -18,13 +18,21 @@ adminrouter = APIRouter(
 def create_doctor_profile(doctor: DoctorCreate, db: Session = Depends(get_db), is_admin: bool = Depends(check_admin_placeholder)):
     return create_doctor_handler(create_doctor_request=doctor, db=db)
 
+from fastapi import Query
 
 @adminrouter.get("/patients")
-def get_patients(db: Session = Depends(get_db), is_admin: bool = Depends(check_admin_placeholder)):
-    result = db.query(Patient).all()
+def get_patients(
+    db: Session = Depends(get_db),
+    is_admin: bool = Depends(check_admin_placeholder),
+    search: str = Query(None, description="Search patients by username")
+):
+    query = db.query(Patient)
+    if search:
+        query = query.filter(Patient.username.ilike(f"%{search}%"))
+    result = query.limit(10).all()
     patients = [{
         "id": patient.id,
-        "username":patient.username ,
+        "username": patient.username,
         "gender": patient.gender,
         "age": patient.age,
         "profile_picture": patient.profile_picture,
@@ -35,10 +43,17 @@ def get_patients(db: Session = Depends(get_db), is_admin: bool = Depends(check_a
     } for patient in result]
     return patients
 
-
 @adminrouter.get("/doctors")
-def get_doctors(db:Session =Depends(get_db),is_admin:bool=Depends(check_admin_placeholder) ):
-    result = db.query(Doctor.id, Doctor.username).all()
+def get_doctors(
+    db:Session =Depends(get_db),
+    is_admin:bool=Depends(check_admin_placeholder),
+    search: str = Query(None, description="Search doctors by username")
+
+                  ):
+    query = db.query(Doctor)
+    if search :
+        query = query.filter(Doctor.username.ilike(f"%{search}%"))
+    result = query.limit(10).all()
     doctors = [{"id": doctor.id, "username": doctor.username , "specialty" :doctor.specialty , "office_location":doctor.office_location} for doctor in result]
     return doctors
 
@@ -147,3 +162,16 @@ def not_attached_doctors(
         {"id": d.id, "username": d.username}
         for d in doctors if d.id not in attached_doctor_ids
     ]
+
+
+
+@adminrouter.delete("/patients/{patient_id}/doctors/{doctor_id}")
+def detach_doctor(patient_id: int, doctor_id: int, db: Session = Depends(get_db), is_admin:bool =Depends(check_admin_placeholder)):
+    patient = db.get(Patient, patient_id)
+    doctor = db.get(Doctor, doctor_id)
+    if not patient or not doctor:
+        raise HTTPException(status_code=404, detail="Patient or Doctor not found")
+    if doctor in patient.doctors:
+        patient.doctors.remove(doctor)
+        db.commit()
+    return {"detail": "Doctor detached from patient"}

@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { MdOutlineCancel } from 'react-icons/md';
-import { post, get } from '@/app/lib/utlis';
+import { post, get, deletePrivileged } from '@/app/lib/utlis';
 import Image from 'next/image';
 
 interface Human {
@@ -77,9 +77,15 @@ export default function Attach({ fetch_url, post_url, attachedUsersUrl }: Attach
     setSelectedHumans((prev) => prev.filter((h) => h.id !== human.id));
   };
 
-  const handleUserDelete = (userId: string) => {
+const handleUserDelete = async (userId: string) => {
+  const result = await deletePrivileged(`/api/users/${userId}`);
+  if (result) {
     setAttachedUsers((prev) => prev.filter((user) => user.id !== userId));
-  };
+  } else {
+    console.error("Failed to delete user");
+  }
+};
+
 
   return (
     <div className="mt-8">

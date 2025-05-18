@@ -3,7 +3,7 @@ interface Input {
   width?: string;
   text: string;
     color?: string;
-    className: string; 
+    className?: string; 
 }
 
 export default function TextPlaceHolder({ width, text, color , className }: Input) {
