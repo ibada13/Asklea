@@ -42,7 +42,7 @@ export default function Patients() {
       {patients?.map((patient) => (
         <Link
           key={patient.id}
-          href={`/patients/${patient.id}`}
+          href={`/admin/patients/${patient.id}`}
           className="w-full max-w-4xl p-6 bg-white rounded-2xl shadow transition hover:shadow-lg border-2 border-gray-200 hover:border-2 hover:border-sg flex flex-col md:flex-row md:items-center md:justify-between group"
         >
           <div className="flex items-center space-x-6">

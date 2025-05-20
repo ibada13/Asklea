@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/app/hooks/auth';
-
+import Loading from '../extra/Loading';
 const LoginPage = () => {
   const { login, isAuth, loading, isDoctor, isAdmin, isPatient, getUser } = useAuth();
   const [email, setEmail] = useState('');
@@ -44,7 +44,7 @@ const LoginPage = () => {
     });
   };
 
-  if (loading) return null;
+  if (loading) return <Loading />;
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-green-50">

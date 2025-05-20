@@ -17,20 +17,14 @@ export default function CenterBarWrapper({ id }: { id?: string | null }) {
     id ? `/doctor/my-patients/${id}/diagnostics` : null,
     get
   )
-  const router = useRouter()
+ 
   const searchParams = useSearchParams()
   const msg = searchParams.get('msg')
-  const [showMsg, setShowMsg] = useState(!!msg)
 
   useEffect(() => {
     if (msg) {
        mutate();
-      setShowMsg(true)
-      const timeout = setTimeout(() => {
-        setShowMsg(false)
-        router.replace(location.pathname, {scroll:false})
-      }, 5000)
-      return () => clearTimeout(timeout)
+
     }
   }, [msg])
 
@@ -72,11 +66,7 @@ export default function CenterBarWrapper({ id }: { id?: string | null }) {
 
   return (
     <>
-      {showMsg && (
-        <div className="fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded shadow z-50">
-          {msg}
-        </div>
-      )}
+     
       <CenterBar
         id={id}
         diagnosis_history={diagnostics.diagnosis_history}

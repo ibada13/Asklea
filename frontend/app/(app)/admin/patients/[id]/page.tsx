@@ -6,7 +6,9 @@ import Loading from "@/app/(app)/extra/Loading";
 import Error from "@/app/(app)/extra/Error";
 import { useParams } from 'next/navigation';
 import Image from 'next/image';
-import Attach from '../../admin/common/Attach';
+import Attach from '../../common/Attach';
+import Oparations from '../../components/Oprations';
+
 
 
 interface PatientType {
@@ -28,10 +30,11 @@ export default function PatientProfile() {
 
   if (isLoading) return <Loading />;
   if (error) return <Error />;
-
+  if(!patient) return
   return (
     <div className="w-full min-h-screen flex flex-col items-center p-6 bg-gray-50">
       <div className="max-w-4xl w-full bg-white rounded-xl shadow-lg p-8">
+                <Oparations edithref={`/admin/patients/${id}/edit`} id={ patient.id} username={ patient.username } />
         <div className="flex justify-center mb-8">
           <Image
             src={ "https://fedskillstest.ct.digital/8.png"}
@@ -50,7 +53,7 @@ export default function PatientProfile() {
           <p className="text-sm text-gray-500">Insurance Type: <span className="text-gray-700">{patient?.insurance_type}</span></p>
         </div>
 
-        <Attach attachedUsersUrl={`/admin/attached_doctors/${id}`} post_url={`/admin/attach_doctors_to_patient/${id}`} fetch_url={`/admin/not_attached_doctors/${id}`} />
+        <Attach del_url={`/admin/patients/${id}/doctors`} attachedUsersUrl={`/admin/attached_doctors/${id}`} post_url={`/admin/attach_doctors_to_patient/${id}`} fetch_url={`/admin/not_attached_doctors/${id}`} />
       </div>
     </div>
   );

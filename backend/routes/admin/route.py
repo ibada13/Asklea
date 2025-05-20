@@ -1,11 +1,18 @@
-from fastapi import APIRouter, Depends ,HTTPException ,Query
+from fastapi import APIRouter, Depends ,HTTPException ,Query ,status
 from fastapi.encoders import jsonable_encoder
-from .handlers import create_doctor_handler, create_patient_handler, attach_doctors_to_patient_handler, attach_patients_to_doctor_handler
+
 from schemas.authschema import PatientCreate, DoctorCreate
 from sqlalchemy.orm import Session
-from db.session import get_db
+
 from pydantic import BaseModel
+
+from .handlers import create_doctor_handler, create_patient_handler, attach_doctors_to_patient_handler, attach_patients_to_doctor_handler
+
+from db.session import get_db
+
+from models.base import User
 from models.models import Doctor ,Patient ,patient_doctor_association
+
 def check_admin_placeholder():
     return True
 
@@ -58,9 +65,19 @@ def get_doctors(
     return doctors
 
 
+from sqlalchemy.orm import load_only
+
 @adminrouter.get("/doctors/{doctor_id}")
 def get_doctor(doctor_id: str, db: Session = Depends(get_db), is_admin: bool = Depends(check_admin_placeholder)):
-    doctor = db.query(Doctor).filter(Doctor.id == doctor_id).first()
+    doctor = db.query(Doctor).options(
+        load_only(
+            Doctor.id,
+            Doctor.username,
+            Doctor.email,
+            Doctor.specialty,
+            Doctor.office_location,
+        )
+    ).filter(Doctor.id == doctor_id).first()
 
     if not doctor:
         raise HTTPException(status_code=404, detail="Doctor not found")
@@ -175,3 +192,28 @@ def detach_doctor(patient_id: int, doctor_id: int, db: Session = Depends(get_db)
         patient.doctors.remove(doctor)
         db.commit()
     return {"detail": "Doctor detached from patient"}
+
+@adminrouter.delete("/doctors/{doctor_id}/patients/{patient_id}")
+def detach_doctor(patient_id: int, doctor_id: int, db: Session = Depends(get_db), is_admin:bool =Depends(check_admin_placeholder)):
+    patient = db.get(Patient, patient_id)
+    doctor = db.get(Doctor, doctor_id)
+    if not patient or not doctor:
+        raise HTTPException(status_code=404, detail="Patient or Doctor not found")
+    if doctor in patient.doctors:
+        patient.doctors.remove(doctor)
+        db.commit()
+    return {"detail": "Doctor detached from patient"}
+
+
+@adminrouter.delete("/{user_id}")
+async def delete_user(user_id:str , db:Session = Depends(get_db) ,is_admin :bool =Depends(check_admin_placeholder)):
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, 
+            detail=f"User with id {user_id} not found"
+        )
+    
+    db.delete(user)
+    db.commit()
+    return {"msg":f"User with the id {user_id} has been delted"}

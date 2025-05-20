@@ -4,6 +4,8 @@ from db.database import Base
 from .enums import *
 from uuid import uuid4 ,UUID
 from sqlalchemy.dialects.postgresql import UUID
+
+
 class User(Base):
     __tablename__ = 'users'
 

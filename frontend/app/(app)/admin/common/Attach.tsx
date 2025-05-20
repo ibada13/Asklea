@@ -14,9 +14,10 @@ interface AttachProps {
   fetch_url: string;
   post_url: string;
   attachedUsersUrl: string;
+  del_url: string;
 }
 
-export default function Attach({ fetch_url, post_url, attachedUsersUrl }: AttachProps) {
+export default function Attach({ fetch_url, post_url, attachedUsersUrl,del_url }: AttachProps) {
   const [humanName, setHumanName] = useState('');
   const [humans, setHumans] = useState<Human[]>([]);
   const [selectedHumans, setSelectedHumans] = useState<Human[]>([]);
@@ -78,7 +79,7 @@ export default function Attach({ fetch_url, post_url, attachedUsersUrl }: Attach
   };
 
 const handleUserDelete = async (userId: string) => {
-  const result = await deletePrivileged(`/api/users/${userId}`);
+  const result = await deletePrivileged(`${del_url}/${userId}`);
   if (result) {
     setAttachedUsers((prev) => prev.filter((user) => user.id !== userId));
   } else {

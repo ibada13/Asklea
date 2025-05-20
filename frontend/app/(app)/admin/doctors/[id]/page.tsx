@@ -4,11 +4,11 @@ import useSWRImmutable from 'swr/immutable';
 import { get, post } from "@/app/lib/utlis";
 import Loading from "@/app/(app)/extra/Loading";
 import Error from "@/app/(app)/extra/Error";
+
 import { useParams } from 'next/navigation';
 import Image from 'next/image';
 import Attach from '../../common/Attach';
-
-
+import Oparations from '../../components/Oprations';
 interface DoctorType {
   id: string;
   username: string;
@@ -27,10 +27,12 @@ export default function DoctorProfile() {
   
   if (isLoading) return <Loading />;
   if (error) return <Error />;
-
+  if (!doctor) return 
   return (
     <div className="w-full min-h-screen flex flex-col items-center p-6 bg-gray-50">
       <div className="max-w-4xl w-full bg-white rounded-xl shadow-lg p-8">
+        <Oparations edithref={`/admin/doctors/${id}/edit`} id={ doctor.id} username={ doctor.username } />
+        
         <div className="flex justify-center mb-8">
           <Image
             src={doctor?.profile_picture || "https://fedskillstest.ct.digital/3.png"}
@@ -47,7 +49,7 @@ export default function DoctorProfile() {
           <p className="text-sm text-gray-500">Email: <a href={`mailto:${doctor?.email}`} className="text-blue-600">{doctor?.email}</a></p>
         </div>
 
-    <Attach attachedUsersUrl={`/admin/attached_patients/${id}`} post_url={`/admin/attach_patients_to_doctor/${id}`} fetch_url={`/admin/not_attached_patients/${id}`}/>
+        <Attach del_url={ `/admin/doctors/${id}/patients`} attachedUsersUrl={`/admin/attached_patients/${id}`} post_url={`/admin/attach_patients_to_doctor/${id}`} fetch_url={`/admin/not_attached_patients/${id}`}/>
       </div>
     </div>
   );
