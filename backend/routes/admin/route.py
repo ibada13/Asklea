@@ -1,3 +1,4 @@
+from typing import Union
 from fastapi import APIRouter, Depends ,HTTPException ,Query ,status
 from fastapi.encoders import jsonable_encoder
 
@@ -6,6 +7,8 @@ from sqlalchemy.orm import Session
 
 from pydantic import BaseModel
 
+from secruity import bcrypt_context
+
 from .handlers import create_doctor_handler, create_patient_handler, attach_doctors_to_patient_handler, attach_patients_to_doctor_handler
 
 from db.session import get_db
@@ -13,6 +16,7 @@ from db.session import get_db
 from models.base import User
 from models.models import Doctor ,Patient ,patient_doctor_association
 
+from .schemas.request import PatientUpdate , DoctorUpdate
 def check_admin_placeholder():
     return True
 
@@ -84,15 +88,36 @@ def get_doctor(doctor_id: str, db: Session = Depends(get_db), is_admin: bool = D
 
     return jsonable_encoder(doctor)
 
+from sqlalchemy.orm import load_only
+
 @adminrouter.get("/patients/{patient_id}")
-def get_doctor(patient_id: str, db: Session = Depends(get_db), is_admin: bool = Depends(check_admin_placeholder)):
-    patient = db.query(Patient).filter(Patient.id == patient_id).first()
+def get_patient(
+    patient_id: str,
+    db: Session = Depends(get_db),
+    is_admin: bool = Depends(check_admin_placeholder)
+):
+    patient = db.query(Patient).options(
+        load_only(
+            Patient.id,
+            Patient.username,
+            Patient.email,
+            Patient.role,
+            Patient.gender,
+            Patient.age,
+            Patient.profile_picture,
+            Patient.date_of_birth,
+            Patient.phone_number,
+            Patient.emergency_contact,
+            Patient.insurance_type
+        )
+    ).filter(Patient.id == patient_id).first()
 
     if not patient:
-        raise HTTPException(status_code=404, detail="patient not found")
+        raise HTTPException(status_code=404, detail="Patient not found")
 
     return jsonable_encoder(patient)
 
+ 
 @adminrouter.post("/patients")
 def create_patient_profile(patient: PatientCreate, db: Session = Depends(get_db), is_admin: bool = Depends(check_admin_placeholder)):
     return create_patient_handler(patient, db)
@@ -217,3 +242,26 @@ async def delete_user(user_id:str , db:Session = Depends(get_db) ,is_admin :bool
     db.delete(user)
     db.commit()
     return {"msg":f"User with the id {user_id} has been delted"}
+
+
+
+@adminrouter.put("/users/{user_id}")
+def update_user(
+    user_id: str,
+    user_update: Union[PatientUpdate, DoctorUpdate],
+    db: Session = Depends(get_db),
+):
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    data = user_update.model_dump(exclude_unset=True)
+    if "password" in data:
+        data["password"] = bcrypt_context.hash(data["password"])
+
+    for key, value in data.items():
+        setattr(user, key, value)
+
+    db.commit()
+
+    return {"id": user_id}

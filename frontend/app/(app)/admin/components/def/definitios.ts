@@ -6,7 +6,7 @@ export type NavLink = {
   href: string;
 };
 
-export type FieldType = "text" | "email" | "password" | "select";
+export type FieldType = "text" | "email" | "password" | "select" | string;
 
 export interface UserField {
     name: "username" | "email" | "password" | string;

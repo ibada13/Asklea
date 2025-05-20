@@ -19,7 +19,7 @@ export default function RootLayout({
         className={` antialiased text-text p-3 bg-background flex flex-col gap-y-5`}
       >
 
-        {/* <Toast/> */}
+        <Toast/>
         <Provider store={store}>
         {/* <NavBar /> */}
         {children}

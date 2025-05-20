@@ -2,27 +2,38 @@
 import { useState } from 'react';
 import { UserField } from './def/definitios';
 import { AiFillEye, AiFillEyeInvisible } from 'react-icons/ai';
-
-const Form = ({
+import { put } from '@/app/lib/utlis';
+import { useRouter } from 'next/navigation';
+const EditForm = ({
   userFields,
   title,
   userdata = {},
+  route,
+  redirect 
 }: {
   userFields: UserField[];
   title: string;
-  userdata?: Record<string, string>;
+    userdata?: Record<string, string>;
+    route: string
+  redirect:string
 }) => {
   const [formData, setFormData] = useState<Record<string, string>>(
     Object.fromEntries(userFields.map((f) => [f.name, userdata[f.name] || '']))
   );
   const [showPassword, setShowPassword] = useState(false);
-
+  const router = useRouter();
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async(e: React.FormEvent) => {
     e.preventDefault();
+    try { 
+     await put(route, formData )
+      router.push(redirect + "?msg=user infos has been edited")
+    } catch (err) {
+      console.log(err)
+     }
     console.log(formData);
   };
 
@@ -57,8 +68,7 @@ const Form = ({
                   type={showPassword ? 'text' : 'password'}
                   name={field.name}
                   value={formData[field.name]}
-                  onChange={handleChange}
-                  required
+                    onChange={handleChange}
                   className="border border-gray-300 px-4 py-2 rounded-lg focus:ring-2 focus:ring-sg focus:outline-none pr-10"
                 />
                 <button
@@ -106,4 +116,4 @@ const Form = ({
   );
 };
 
-export default Form;
+export default EditForm;
