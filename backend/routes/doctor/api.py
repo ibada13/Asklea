@@ -82,6 +82,7 @@ def get_patient_diagnostics(
         {
             "id": d.id,
             "name": d.name,
+            "posted_by" :d.doctor.username,
             "description": d.description,
             "status": d.status.value if hasattr(d.status, "value") else d.status,
             "is_by_this_doc": d.doctor_id == doctor.id

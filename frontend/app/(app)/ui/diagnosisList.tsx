@@ -55,7 +55,8 @@ const DiagnosisList = ({ diagnostic_list }: { diagnostic_list: diagnostic_list[]
                 key={`dlist-${idx}`}
                 className="flex justify-between items-center px-4 py-3 text-sm hover:bg-gray-100 cursor-pointer"
                 onClick={() => setViewItem(elm)}
-              >
+                >
+                <p className="w-[30%] truncate">{elm.posted_by}</p>
                 <p className="w-[30%] truncate">{elm.name}</p>
                 <p className="w-[30%] truncate">{elm.description}</p>
                 <p className="w-[15%] capitalize">{elm.status}</p>

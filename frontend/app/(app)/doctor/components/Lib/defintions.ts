@@ -33,7 +33,9 @@ export type Status = "pending" | "in_progress" | "completed";
 export const StatusOptions = ["pending", "in_progress", "completed"] as const;
 
 export interface diagnostic_list 			{
-	id:number,
+
+	id: number,
+	posted_by:string, 
 		is_by_this_doc:boolean ,
 		"name": string,
 		"description": string,

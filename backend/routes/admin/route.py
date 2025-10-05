@@ -16,8 +16,8 @@ from .handlers import create_doctor_handler, create_patient_handler, attach_doct
 
 from db.session import get_db
 
-from models.base import DiagnosisReport, Message, MessageReportes, PatientDetachRequest, User
-from models.models import Doctor ,Patient, PatientEditRequest ,patient_doctor_association
+from models.base import DiagnosisReport, Message, MessageReportes, PatientDetachRequest, User,DiagnosticList
+from models.models import Doctor ,Patient, PatientEditRequest ,patient_doctor_association 
 
 from .schemas.request import PatientUpdate , DoctorUpdate
 from .schemas.response import DetachRequestSummary, PatientEditRequestSummary
@@ -631,8 +631,11 @@ def handle_diagnosis_report(
                 raise HTTPException(status_code=404, detail="Reported doctor not found")
 
             doctor.can_post = False
-            db.add(doctor)
+            if report.diagnostic_list :
+                db.delete(report.diagnostic_list)
+            
             db.query(DiagnosisReport).filter(DiagnosisReport.posted_by_id == report.posted_by_id).delete(synchronize_session=False)
+            
             db.commit()
             return {"detail": "Report accepted. Doctor blocked from posting diagnoses. Related reports deleted."}
 
