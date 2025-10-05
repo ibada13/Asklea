@@ -6,9 +6,10 @@ import PatientCard from "../../ui/PatientCard";
 import TextPlaceHolder from "../../extra/TextPlaceHolder";
 import useSWR  from "swr";
 import { getPrivliged } from "@/app/lib/utlis";
+import useSWRImmutable from "swr/immutable";
 export default function RightBar() { 
 
-  const { data: patient, isLoading, error } = useSWR(`/patients/me`, getPrivliged)
+  const { data: patient, isLoading, error } = useSWRImmutable(`/patient/me`, getPrivliged)
 
    if (isLoading) { 
         return <TextPlaceHolder  className="w-[30%] flex justify-center  font-bold text-sg"  text="Loading..."/>
@@ -25,7 +26,7 @@ export default function RightBar() {
     }
     return (
         <div className="flex flex-col w-[30%] rounded-lg gap-y-2">
-            <PatientCard patient={ patient} />
+            <PatientCard showEditButton={true} patient={ patient} />
             {/* <LabResultes patient={patient} /> */}
         </div>
     );

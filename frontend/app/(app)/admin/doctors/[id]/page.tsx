@@ -1,6 +1,6 @@
 'use client';
 
-import useSWRImmutable from 'swr/immutable';
+
 import { get, post } from "@/app/lib/utlis";
 import Loading from "@/app/(app)/extra/Loading";
 import Error from "@/app/(app)/extra/Error";
@@ -9,6 +9,7 @@ import { useParams } from 'next/navigation';
 import Image from 'next/image';
 import Attach from '../../common/Attach';
 import Oparations from '../../components/Oprations';
+import useSWR from 'swr';
 interface DoctorType {
   id: string;
   username: string;
@@ -22,7 +23,7 @@ export default function DoctorProfile() {
   const { id } = useParams();
 
 
-  const { data: doctor, error, isLoading } = useSWRImmutable<DoctorType>(id ? `/admin/doctors/${id}` : null, get);
+  const { data: doctor, error, isLoading } = useSWR<DoctorType>(id ? `/admin/doctors/${id}` : null, get);
 
   
   if (isLoading) return <Loading />;
@@ -35,7 +36,7 @@ export default function DoctorProfile() {
         
         <div className="flex justify-center mb-8">
           <Image
-            src={doctor?.profile_picture || "https://fedskillstest.ct.digital/3.png"}
+            src={doctor?.profile_picture || "/pfp.jpg"}
             alt={`${doctor?.username}'s profile`}
             width={128}
             height={128}

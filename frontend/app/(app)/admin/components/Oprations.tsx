@@ -47,7 +47,7 @@ export default function Oparations({ username , id ,edithref}: {username:string 
                     <div className="flex flex-col w-full items-start space-y-4">
                             <p>Enter the name of the user to confirm deletion: <strong>{ username}</strong></p>
                     <input
-                        className="w-5/6 p-4 rounded-lg border-2 border-gray-300 focus:outline-none focus:ring-0 focus:border-sg"
+                        className={`w-5/6 p-4 rounded-lg border-2 ${disabled ? "focus:border-red-400":"border-sg"} border-gray-300 focus:outline-none focus:ring-0 focus:border-sg`}
                         placeholder="username"
                         onChange={(e)=>inputchange(e.target.value)}
                         type="text"

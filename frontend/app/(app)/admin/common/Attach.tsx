@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { MdOutlineCancel } from 'react-icons/md';
 import { post, get, deletePrivileged } from '@/app/lib/utlis';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 
 interface Human {
   id: string;
@@ -17,22 +18,68 @@ interface AttachProps {
   del_url: string;
 }
 
-export default function Attach({ fetch_url, post_url, attachedUsersUrl,del_url }: AttachProps) {
+function Card({
+  human,
+  onDelete,
+  onClick,
+  showDelete = true,
+}: {
+  human: Human;
+  onDelete?: (human: Human) => void;
+  onClick?: (human: Human) => void;
+  showDelete?: boolean;
+}) {
+  return (
+    <div
+      onClick={onClick ? () => onClick(human) : undefined}
+      className={`relative flex flex-col items-center p-4 border rounded-lg cursor-pointer shadow-sm hover:shadow-md transition ${
+        onClick ? 'hover:bg-gray-50' : ''
+      }`}
+      style={{ width: 140 }}
+    >
+      {showDelete && onDelete && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onDelete(human);
+          }}
+          className="absolute top-2 right-2 text-red-600 hover:text-red-800 transition"
+          aria-label="Delete"
+        >
+          <MdOutlineCancel size={20} />
+        </button>
+      )}
+
+      <Image
+        src={human.profile_picture || "/pfp.jpg"}
+        alt={human.username}
+        width={70}
+        height={70}
+        className="rounded-full mb-3"
+      />
+      <span className="text-center font-medium break-words">{human.username}</span>
+    </div>
+  );
+}
+
+export default function Attach({
+  fetch_url,
+  post_url,
+  attachedUsersUrl,
+  del_url,
+}: AttachProps) {
   const [humanName, setHumanName] = useState('');
   const [humans, setHumans] = useState<Human[]>([]);
   const [selectedHumans, setSelectedHumans] = useState<Human[]>([]);
   const [attachedUsers, setAttachedUsers] = useState<Human[]>([]);
   const [loading, setLoading] = useState(false);
-  const [successMessage, setSuccessMessage] = useState('');
+  const router = useRouter();
 
   const selectedHumanIds = selectedHumans.map((h) => h.id);
 
   useEffect(() => {
     if (!attachedUsersUrl) return;
-
-    get(attachedUsersUrl)
-      .then((res) => setAttachedUsers(res))
-      .catch(() => {});
+    get(attachedUsersUrl).then(setAttachedUsers).catch(() => {});
   }, [attachedUsersUrl]);
 
   useEffect(() => {
@@ -41,7 +88,6 @@ export default function Attach({ fetch_url, post_url, attachedUsersUrl,del_url }
         setHumans([]);
         return;
       }
-
       get(`${fetch_url}?name=${encodeURIComponent(humanName)}`)
         .then((res: Human[]) => {
           const filtered = res.filter((h) => !selectedHumanIds.includes(h.id));
@@ -49,24 +95,22 @@ export default function Attach({ fetch_url, post_url, attachedUsersUrl,del_url }
         })
         .catch(() => {});
     }, 300);
-
     return () => clearTimeout(timeout);
   }, [humanName, selectedHumanIds.join(',')]);
 
   const handleAttachHumans = async () => {
-    if (selectedHumanIds.length === 0) return;
+    if (!selectedHumanIds.length) return;
     setLoading(true);
     try {
-      await post(post_url, JSON.stringify( selectedHumanIds ));
-      setSuccessMessage('Users successfully attached!');
+      await post(post_url, JSON.stringify(selectedHumanIds));
+      router.push(`${location.pathname}?msg=users were been attached`, {
+        scroll: false,
+      });
       setSelectedHumans([]);
       const updated = await get(attachedUsersUrl);
       setAttachedUsers(updated);
-    } catch {
-      setSuccessMessage('Failed to attach.');
-    } finally {
-      setLoading(false);
-    }
+    } catch {}
+    setLoading(false);
   };
 
   const handleHumanSelection = (human: Human) => {
@@ -78,51 +122,47 @@ export default function Attach({ fetch_url, post_url, attachedUsersUrl,del_url }
     setSelectedHumans((prev) => prev.filter((h) => h.id !== human.id));
   };
 
-const handleUserDelete = async (userId: string) => {
-  const result = await deletePrivileged(`${del_url}/${userId}`);
-  if (result) {
-    setAttachedUsers((prev) => prev.filter((user) => user.id !== userId));
-  } else {
-    console.error("Failed to delete user");
-  }
-};
-
+  const handleUserDelete = async (userId: string) => {
+    try {
+      const response = await deletePrivileged(`${del_url}/${userId}`);
+      if (response) {
+        router.push(`${location.pathname}?msg=users were deattached`, {
+          scroll: false,
+        });
+        setAttachedUsers((prev) => prev.filter((user) => user.id !== userId));
+      }
+    } catch(err) {
+      router.push(`${location.pathname}?msg=Failed to deattach users check log for more infos&&color=red`, {scroll:false});
+    }
+  };
 
   return (
-    <div className="mt-8">
+    <div className="mt-8 space-y-8">
       {attachedUsers.length > 0 && (
-        <div className="mb-6">
-          <h3 className="font-semibold text-gray-700">Attached Users:</h3>
-          <div className="flex flex-col gap-3">
+        <div>
+          <h3 className="font-semibold text-gray-700 mb-4">Attached Users:</h3>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
             {attachedUsers.map((user) => (
-              <div key={user.id} className="flex items-center justify-between py-2 px-3 border-2 border-gray-200 rounded-md">
-                <span>{user.username}</span>
-                <button
-                  onClick={() => handleUserDelete(user.id)}
-                  className="text-red-600 hover:text-red-800 transition"
-                >
-                  <MdOutlineCancel size={24} />
-                </button>
-              </div>
+              <Card
+                key={user.id}
+                human={user}
+                onDelete={() => handleUserDelete(user.id)}
+              />
             ))}
           </div>
         </div>
       )}
 
       {selectedHumans.length > 0 && (
-        <div className="mb-4">
-          <h3 className="font-semibold text-gray-700">Selected Users:</h3>
-          <div className="flex flex-col gap-3">
+        <div>
+          <h3 className="font-semibold text-gray-700 mb-4">Selected Users:</h3>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
             {selectedHumans.map((human) => (
-              <div key={human.id} className="flex items-center justify-between py-2 px-3 border-2 border-gray-200 rounded-md">
-                <span>{human.username}</span>
-                <button
-                  onClick={() => handleHumanDelete(human)}
-                  className="text-red-600 hover:text-red-800 transition"
-                >
-                  <MdOutlineCancel size={24} />
-                </button>
-              </div>
+              <Card
+                key={human.id}
+                human={human}
+                onDelete={() => handleHumanDelete(human)}
+              />
             ))}
           </div>
         </div>
@@ -136,42 +176,28 @@ const handleUserDelete = async (userId: string) => {
         className="p-2 border border-gray-300 rounded-md w-full"
       />
 
-      <div className="mt-4 space-y-2">
-        {humans.length > 0 ? (
+      <div className="mt-6 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+        {humans.length ? (
           humans.map((human) => (
-            <button
+            <Card
               key={human.id}
-              onClick={() => handleHumanSelection(human)}
-              className="w-full flex items-center gap-4 p-3 bg-gray-100 rounded-md border hover:bg-gray-200"
-            >
-              <Image
-                src={
-                  human.profile_picture?.trim()
-                    ? human.profile_picture
-                    : 'https://fedskillstest.ct.digital/8.png'
-                }
-                alt={human.username}
-                width={40}
-                height={40}
-                className="rounded-full"
-              />
-              <span>{human.username}</span>
-            </button>
+              human={human}
+              onClick={handleHumanSelection}
+              showDelete={false}
+            />
           ))
         ) : (
-          <p className="text-gray-500">No users found</p>
+          <p className="text-gray-500 col-span-full text-center">No users found</p>
         )}
       </div>
 
       <button
         onClick={handleAttachHumans}
-        className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-full w-full"
+        className="mt-6 px-4 py-2 bg-blue-600 text-white rounded-full w-full"
         disabled={loading}
       >
         {loading ? 'Attaching...' : 'Attach Users'}
       </button>
-
-      {successMessage && <p className="mt-4 text-green-600">{successMessage}</p>}
     </div>
   );
 }

@@ -2,8 +2,8 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { post } from "@/app/lib/utlis";
-
-const StatusOptions = ["pending", "in-progress", "resolved"] as const;
+import { StatusOptions } from "../doctor/components/Lib/defintions";
+// const StatusOptions = ["pending", "in-progress", "resolved"] as const;
 type Status = typeof StatusOptions[number];
 
 export default function DiagnosticListForm({
@@ -34,8 +34,12 @@ export default function DiagnosticListForm({
       await post(`/doctor/${patient_id}/diagnosticlist`, formData);
       router.replace(window.location.pathname + "?msg=Diagnostic saved successfully", {scroll:false});
       onCloseAction();
-    } catch {
-      //
+    } catch (err :any){
+    const errorMsg =
+      err?.response?.data?.detail || "Some error occurred";
+    router.push(`${window.location.pathname}?msg=${errorMsg}&color=red`, {
+      scroll: false,
+    });
     }
   }
 

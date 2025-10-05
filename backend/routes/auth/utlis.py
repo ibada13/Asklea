@@ -1,8 +1,9 @@
 from datetime import datetime ,timezone ,timedelta
-from fastapi import HTTPException,Depends
+from typing import Optional
+from fastapi import HTTPException,Depends, Query
 from secruity import oauth2_bearer ,bcrypt_context
 from schemas.authschema import UserCreate ,DoctorCreate ,PatientCreate
-from sqlalchemy.orm import Session 
+from sqlalchemy.orm import Session  ,with_polymorphic
 from sqlalchemy import create_pool_from_url, or_
 from models.base import User
 from models.models import Admin ,  Doctor ,Patient,patient_doctor_association 
@@ -11,6 +12,8 @@ from jose import jwt ,JWTError
 from models.enums import Role
 from db.session import get_db
 from config import SECRET_KEY  ,ALGORITHM
+
+
 def create_admin_handler(create_user_request :UserCreate , db:Session):
     try:
         admin = db.query(Admin).filter(or_(Admin.email == create_user_request.email , Admin.username == create_user_request.username)).first()
@@ -74,7 +77,49 @@ async def get_current_user(db:Session = Depends(get_db) , token :str =Depends(oa
     
     except JWTError  :
         raise HTTPException(status_code=401,detail="Invalid credentials")
+
+
+
+
+async def get_current_user_with_token(
+    token: str  ,
+    db: Session ,
+) -> Optional[User]:
+    if not token:
+        return None
+    try:
+        payload = jwt.decode(token, key=SECRET_KEY, algorithms=[ALGORITHM])
+        user_id: str = payload.get("id")
+        if user_id is None:
+            return None
+        return db.query(User).filter(User.id == user_id).first()
+    except JWTError:
+        return None
     
+
+
+async def get_user_if_can_message(token: str, db: Session) -> tuple[Optional[User], Optional[str]]:
+    if not token:
+        return None, "Token missing"
+    try:
+        payload = jwt.decode(token, key=SECRET_KEY, algorithms=[ALGORITHM])
+        user_id = payload.get("id")
+        if user_id is None:
+            return None, "Invalid token"
+
+        user_poly = with_polymorphic(User, [Doctor, Patient])
+        user = db.query(user_poly).filter(user_poly.id == user_id).first()
+
+        if user is None:
+            return None, "User not found"
+
+
+        return user, None
+    except JWTError:
+        return None, "Token is invalid"
+
+
+
 async def check_current_user(token :str =Depends(oauth2_bearer) ):
     try:
         payload = jwt.decode(token=token,key=SECRET_KEY ,algorithms=ALGORITHM)
@@ -89,11 +134,13 @@ async def check_current_user(token :str =Depends(oauth2_bearer) ):
 
 
 
-async def refresh_token(token :str =Depends(oauth2_bearer)  , db:Session=Depends(get_db)):
+async def refresh_token(token :str ,db:Session):
     try:
         payload = jwt.decode(token=token,key=SECRET_KEY ,algorithms=ALGORITHM)
         username :str = payload.get("sub")
-        userid:int = payload.get("id")
+        userid:str = payload.get("id")
+        print("test"  ,username , userid)
+
         if username is None or userid is None :
             raise HTTPException(status_code=401 , detail="Invalid credentials")
         user = db.query(User).filter(User.id == userid).first()
@@ -169,14 +216,14 @@ async def get_current_patient(db:Session=Depends(get_db), token:str=Depends(oaut
 async def get_current_doctor(db:Session=Depends(get_db), token:str=Depends(oauth2_bearer)):
     try:
         payload = jwt.decode(token=token,key=SECRET_KEY ,algorithms=ALGORITHM)
-        doctor_id:int = payload.get("id")
+        doctor_id:str = payload.get("id")
         doctor = db.query(Doctor).filter(Doctor.id == doctor_id).first()
         
         if not doctor:
             raise HTTPException(status_code=401, detail="Doctor not found")
         
         
-        return doctor_id 
+        return doctor 
     except JWTError  :
         raise HTTPException(status_code=401,detail="Invalid credentials")
     

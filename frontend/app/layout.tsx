@@ -1,10 +1,10 @@
 'use client'
-import type { Metadata } from "next";
-import "./globals.css";
-import { Provider } from "react-redux";
+import AuthProvider from "./state/AuthProvider";
+import "./globals.css"
+
+
 import Toast from "./Toast";
-import NavBar from "./NavBar";
-import { store } from "./state/store";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -20,10 +20,12 @@ export default function RootLayout({
       >
 
         <Toast/>
-        <Provider store={store}>
-        {/* <NavBar /> */}
+        <AuthProvider>
+
+      
         {children}
-        </Provider>
+        </AuthProvider>
+        
       </body>
     </html>
   );

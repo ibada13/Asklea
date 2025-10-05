@@ -1,45 +1,33 @@
-// import logo from './[id]/layout/components/assets/TestLogo.svg'
-import Image from 'next/image'
-import { MdOutlineHome } from "react-icons/md";
-import { IoPeople } from "react-icons/io5";
-import { RiCalendarScheduleLine } from "react-icons/ri";
-import { FaRegCreditCard } from "react-icons/fa";
-import { TiMessage } from "react-icons/ti";
-// import drpic from './[id]/layout/components/assets/senior-woman-doctor-and-portrait-smile-for-health-2023-11-27-05-18-16-utc.png'
-import { IoMdSettings } from "react-icons/io";
-import { BsThreeDotsVertical } from "react-icons/bs";
-const NavBar = () => { 
+'use client';
+import Image from 'next/image';
 
+import { FiLogOut } from 'react-icons/fi';
+import logo from '@/public/logo.png';
+import { UseAuth } from './state/AuthProvider';
+export default function NavBar() {
+  const { handleLogout } = UseAuth();
 
-    return (
-        <div className="h-1/6 w-full flex justify-between items-center p-3 bg-white text-xs rounded-lg" >
-            {/* <Image src={logo} alt='logo' className='w-[10%]' /> */}
-            <div className='flex justify-between gap-x-2 font-bold text-sm'>
-
-            <p className='flex gap-x-1 items-center rounded-lg p-2 bg-sg'><MdOutlineHome size={15}/>Overview</p>
-            <p className='flex gap-x-1 items-center rounded-lg p-2 '><IoPeople size={15}/>Patients</p>
-            <p className='flex gap-x-1 items-center rounded-lg p-2 '><RiCalendarScheduleLine size={15}/>Schedule</p>
-            <p className='flex gap-x-1 items-center rounded-lg p-2 '><TiMessage size={15}/>Messages</p>
-            <p className='flex gap-x-1 items-center rounded-lg p-2 '><FaRegCreditCard size={15}/>Transactions</p>
-            </div>
-            <div className='flex justify-between gap-x-2'>
-                <div className='flex gap-x-1 items-center'>
-                    
-                <div className='w-8 h-8 relative'>
-                    {/* <Image className='object-cover rounded-full' src={drpic} alt='dr picture' layout='fill' /> */}
-                </div>
-                <div className='flex flex-col items-center justify-center text-nowrap'>
-                    <p className='font-bold text-xs'>dr. Jsoe simmons</p>
-                    <p className='text-xs '>Genral practitoner</p>
-                </div>
-                </div>
-                <div className='flex items-center'>
-                    <IoMdSettings size={20}/>
-                    <BsThreeDotsVertical size={20}/>
-                </div>
-
-        </div>
-        </div>
-    )
+  return (
+    <nav className="w-full h-20 px-8 flex items-center justify-between bg-white rounded-xl shadow-md border">
+      <div className="flex items-center gap-4">
+        <Image src={logo} alt="Logo" width={80} height={60} className="object-contain" />
+        {/* Future Nav Icons (optional):
+        <div className="hidden md:flex gap-6 text-gray-500">
+          <MdOutlineHome size={22} className="hover:text-blue-600 cursor-pointer" />
+          <IoPeople size={22} className="hover:text-blue-600 cursor-pointer" />
+          <RiCalendarScheduleLine size={22} className="hover:text-blue-600 cursor-pointer" />
+          <FaRegCreditCard size={22} className="hover:text-blue-600 cursor-pointer" />
+          <TiMessage size={22} className="hover:text-blue-600 cursor-pointer" />
+          <IoMdSettings size={22} className="hover:text-blue-600 cursor-pointer" />
+        </div> */}
+      </div>
+      <button
+        onClick={() =>handleLogout()}
+        className="flex items-center gap-2 text-sm text-red-600 hover:text-white hover:bg-red-500 transition-all px-4 py-2 rounded-md"
+      >
+        <FiLogOut size={18} />
+        Logout
+      </button>
+    </nav>
+  );
 }
-export default NavBar

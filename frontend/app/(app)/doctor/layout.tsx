@@ -1,15 +1,16 @@
 'use client'
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import UseAuth from '@/app/hooks/useAuth'
-
+import Auth from '@/app/hooks/useAuth'
+import NavBar from '@/app/NavBar'
 const Layout = ({ children }: { children: React.ReactNode }) => {
 
 
   return (
-    <UseAuth middleware='doctor'>
+    <Auth middleware='doctor'>
+      <NavBar />
     {children}
-    </UseAuth>
+    </Auth>
   )
 }
 

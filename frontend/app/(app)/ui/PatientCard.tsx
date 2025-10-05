@@ -6,15 +6,16 @@ import { BsTelephone } from "react-icons/bs"
 import Image from "next/image"
 import { convertDate } from "../doctor/components/Lib/functions"
 import { IoShieldCheckmarkOutline } from "react-icons/io5"
+import Link from "next/link"
 
-export default function PatientCard({ patient }: { patient: any }) {
+export default function PatientCard({ patient , showEditButton=false }: { patient: any  , showEditButton?:boolean}) {
 
 
   return (
     <div className="w-full bg-white flex flex-col gap-y-4 p-2 rounded-lg">
       <div className="w-full h-[28%] flex flex-col items-center justify-between">
         <div className="w-32 h-32 flex justify-center">
-          <Image className="bg-cover w-full h-full rounded-full" width={100} height={100} src={patient.profile_picture} alt="" />
+          <Image className="bg-cover w-full h-full rounded-full" width={100} height={100} src={patient.profile_picture || "/pfp.jpg"} alt="" />
         </div>
         <p className="text-xl font-bold">{patient.name}</p>
       </div>
@@ -70,10 +71,12 @@ export default function PatientCard({ patient }: { patient: any }) {
           </div>
         </div>
       </div>
-
+      { 
+    showEditButton &&
       <div className="w-full flex justify-center items-center">
-        <button className="bg-sg w-4/5 font-bold p-2 text-nowrap text-xs rounded-xl">Show all Information</button>
+        <Link href={"/patient/edit"} className="bg-sg w-4/5 font-bold p-4 text-center text-nowrap text-xs rounded-xl">Edit My Information</Link>
       </div>
+      }
     </div>
   )
 }

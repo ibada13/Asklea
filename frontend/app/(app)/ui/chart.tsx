@@ -1,4 +1,4 @@
-import { diagnosis_history } from "../components/Lib/defintions";
+import { diagnosis_history } from '../doctor/components/Lib/defintions';
 import {
     Chart as ChartJS,
     CategoryScale,
@@ -23,10 +23,18 @@ ChartJS.register(
 );
 
 export default function Chart({ diagnosis_history, range }: { diagnosis_history: diagnosis_history[], range: number }) {
-    const recentHistory = diagnosis_history.slice(-range);
-    const labels = recentHistory.map(item => `${item.month.slice(0, 3)},${item.year}`).reverse();
-    const systolicData = recentHistory.map(item => item.blood_pressure_systolic_value).reverse();
-    const diastolicData = recentHistory.map(item => item.blood_pressure_diastolic_value).reverse();
+    const recentHistory = [...diagnosis_history]
+        .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime())
+        .slice(-range);
+
+    const labels = recentHistory
+        .map(item => {
+            const date = new Date(item.timestamp);
+            return `${date.getDay()} ${date.toLocaleString('default', { month: 'short' })} ${date.getFullYear()}`;
+        });
+
+    const systolicData = recentHistory.map(item => item.blood_pressure_systolic_value);
+    const diastolicData = recentHistory.map(item => item.blood_pressure_diastolic_value);
 
     const data = {
         labels: labels,
@@ -83,7 +91,5 @@ export default function Chart({ diagnosis_history, range }: { diagnosis_history:
         },
     };
 
-    return (
-        <Line className="self-center" data={data} options={options} />
-    )
+    return <Line className="self-center" data={data} options={options} />;
 }

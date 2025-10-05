@@ -15,7 +15,6 @@ class DoctorCreate(UserCreate):
 class PatientCreate(UserCreate):
     gender: Gender
     age: Optional[int]
-    profile_picture: Optional[str]
     date_of_birth: Optional[date]
     phone_number: Optional[str]
     emergency_contact: Optional[str]

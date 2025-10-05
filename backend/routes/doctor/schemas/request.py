@@ -1,11 +1,11 @@
+from datetime import datetime
 from pydantic import BaseModel, conint, confloat
 from typing import Literal
-from models.enums import DiagnosticStatus
+from models.enums import DiagnosisStatus
 Level = Literal["Low", "Normal", "High", "Lower than Average", "Higher than Average"]
 
 class DiagnosisHistoryRequest(BaseModel):
-    month: str
-    year: int
+    timestamp: datetime
     blood_pressure_systolic_value: int
     blood_pressure_systolic_levels: Level
     blood_pressure_diastolic_value: int
@@ -17,8 +17,15 @@ class DiagnosisHistoryRequest(BaseModel):
     temperature_value: float
     temperature_levels: Level
 
-
+    
 class DiagnosticListRequest(BaseModel):
     name:str
     description: str | None = None
-    status: DiagnosticStatus
+    status: DiagnosisStatus
+
+
+
+class DiagnosisReportCreate(BaseModel):
+    description: str
+    diagnostic_list_id: int
+

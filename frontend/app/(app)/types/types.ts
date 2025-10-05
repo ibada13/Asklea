@@ -36,3 +36,22 @@ export interface PatientInfo {
   insurance_type: InsuranceType;
 }
 
+
+export interface PatientforListType { 
+    id: string;
+    age: number;
+    gender: "male" | "female";
+    username: string;
+  profile_picture: string; 
+  detach: boolean;
+}
+
+
+export interface DoctorforListType { 
+  id: string;
+  specialty: string;
+    // age: number;
+    // gender: "male" | "female";
+    username: string;
+    profile_picture: string; 
+}

@@ -11,7 +11,7 @@ export default function DoctorCard({ doctor }: {doctor:DoctorInfo}) {
           >
             <div className="flex flex-col items-center mb-6">
               <Image
-                src={doctor.profile_picture || "https://fedskillstest.ct.digital/3.png"}
+                src={doctor.profile_picture || "/pfp.jpg"}
                 alt={`${doctor.username}'s profile`}
                 width={64}
                 height={64}

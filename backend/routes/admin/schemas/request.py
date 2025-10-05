@@ -19,3 +19,4 @@ class PatientUpdate(UserUpdate):
 class DoctorUpdate(UserUpdate):
     specialty: Optional[Specialty]
     office_location: Optional[str]
+

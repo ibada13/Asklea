@@ -14,6 +14,6 @@ export default function EditDoctor() {
     if (!doctor) return
     return (
         
-        <EditForm redirect={`/admin/doctors/${id}`} route={`/admin/users/${id}`} title="Doctor Edit Form" userFields={doctorFields} userdata={doctor}/>
+        <EditForm msg="user's info was updated successfully" redirect={`/admin/doctors/${id}`} route={`/admin/users/${id}`} title="Doctor Edit Form" userFields={doctorFields} userdata={doctor}/>
     )
 }

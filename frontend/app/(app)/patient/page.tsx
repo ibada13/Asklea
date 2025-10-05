@@ -1,17 +1,18 @@
 'use client'
 import UseAuth from "@/app/hooks/useAuth";
 import RightBar from "./components/Rightbar";
-import LeftBarWrapper from "./components/Leftbar";
+import CenterBarWrapper from "./components/Centerbar";
+import LeftBar from "./components/LeftBar";
 export default function PatientPage() {
     
 
     return (
-        <UseAuth middleware="patient">
 
                 <div className="flex justify-around gap-x-4">
-                    <LeftBarWrapper/>
+                    <LeftBar/>
+
+                    <CenterBarWrapper/>
                     <RightBar/>
                 </div>
-        </UseAuth>
     );
  }

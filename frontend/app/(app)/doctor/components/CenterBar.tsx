@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import useSWR from 'swr'
 
-import { get } from '@/app/lib/utlis'
+import { get, getPrivliged } from '@/app/lib/utlis'
 import { useRouter } from 'next/navigation'
 import TextPlaceHolder from '../[id]/layout/extra/TextPlaceHolder'
 import ChartCard from '../../ui/chartcard'
@@ -15,7 +15,7 @@ import DiagnosticListForm from '../../ui/Diagnosislistform'
 export default function CenterBarWrapper({ id }: { id?: string | null }) {
   const { data: diagnostics, isLoading, error ,mutate } = useSWR(
     id ? `/doctor/my-patients/${id}/diagnostics` : null,
-    get
+    getPrivliged
   )
  
   const searchParams = useSearchParams()
@@ -79,10 +79,12 @@ export default function CenterBarWrapper({ id }: { id?: string | null }) {
 function CenterBar({
   diagnosis_history,
   diagnostic_list,
-  id
+  id,
+
 }: {
   diagnosis_history: any[]
-  diagnostic_list: any[]
+    diagnostic_list: any[]
+
   id: string
 }) {
   const [showForm, setShowForm] = useState(false)
@@ -95,7 +97,7 @@ function CenterBar({
             <p className="font-bold">Diagnostic</p>
             <button
               onClick={() => setShowForm(true)}
-              className="text-xl font-bold px-3 rounded hover:bg-gray-200"
+              className={`text-xl font-bold px-3 rounded  hover:bg-gray-200`}
               title="Add new diagnosis"
             >
               +
@@ -107,11 +109,11 @@ function CenterBar({
           </div>
         </div>
 
-        {/* + button above the diagnostic list */}
+      
         <div className="flex flex-col justify-end mb-2 bg-white py-3 px-1 rounded-md">
           <button
             onClick={() => setShowListForm(true)}
-            className="text-xl self-end font-bold px-3 rounded hover:bg-gray-200"
+            className={`text-xl self-end font-bold px-3 rounded hover:bg-gray-200`}
             title="Add new diagnosis"
           >
             +

@@ -8,6 +8,7 @@ import { useParams } from 'next/navigation';
 import Image from 'next/image';
 import Attach from '../../common/Attach';
 import Oparations from '../../components/Oprations';
+import useSWR from 'swr';
 
 
 
@@ -26,7 +27,7 @@ interface PatientType {
 export default function PatientProfile() {
   const { id } = useParams();
 
-  const { data: patient, error, isLoading } = useSWRImmutable<PatientType>(id ? `/admin/patients/${id}` : null, get);
+  const { data: patient, error, isLoading } = useSWR<PatientType>(id ? `/admin/patients/${id}` : null, get);
 
   if (isLoading) return <Loading />;
   if (error) return <Error />;
@@ -37,7 +38,7 @@ export default function PatientProfile() {
                 <Oparations edithref={`/admin/patients/${id}/edit`} id={ patient.id} username={ patient.username } />
         <div className="flex justify-center mb-8">
           <Image
-            src={ "https://fedskillstest.ct.digital/8.png"}
+            src={ patient?.profile_picture||"/pfp.jpg"}
             alt={`${patient?.username}'s profile`}
             width={128}
             height={128}

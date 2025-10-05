@@ -17,9 +17,9 @@ export default function Home() {
         >
           Source Code <BsGithub size={20} />
         </Link>
-
+    
         <Link 
-          href={"/0"} 
+          href={"/login"} 
           className="w-1/4 bg-gray-300 p-3 rounded-lg font-bold hover:bg-gray-400 transition-colors duration-200"
         >
           Visit the Project

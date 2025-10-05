@@ -1,12 +1,15 @@
 from fastapi import APIRouter ,Depends ,HTTPException
 from passlib.context import CryptContext
-from fastapi.security import OAuth2PasswordBearer ,OAuth2PasswordRequestForm
+from fastapi.security import OAuth2PasswordBearer ,OAuth2PasswordRequestForm , oauth2
 
 from pydantic import BaseModel
 from sqlalchemy.orm import Session 
 from db.session import get_db
 from schemas.authschema import UserCreate ,Token
 from .utlis import check_admin,check_current_user,create_admin_handler ,auth_user ,get_current_user , refresh_token
+
+
+from secruity import oauth2_bearer 
 authroute = APIRouter(
     prefix="/api/auth",
     tags=["auth"]
@@ -44,10 +47,10 @@ async def create_admin(create_user_request:UserCreate,db:Session = Depends(get_d
 
 
 @authroute.post("/token",response_model=Token)
-async def login_by_token(form_data:OAuth2PasswordRequestForm=Depends() , db:Session =Depends(get_db)):
+async def login(form_data:OAuth2PasswordRequestForm=Depends() , db:Session =Depends(get_db)):
     try:
-        print(form_data)
         token , role= auth_user(form_data.username , form_data.password , db)
+        print(role , token )
         return {"access_token":token,
                 "token_type":"bearer",
                 "role":role ,
@@ -58,6 +61,6 @@ async def login_by_token(form_data:OAuth2PasswordRequestForm=Depends() , db:Sess
         raise HTTPException(status_code=500 , detail=f"Error occured {str(e)}")
 
 
-@authroute.post("/refresh-token")
-async def refresh_access_token( ):
-    return refresh_token()
+@authroute.post("/refresh")
+async def refresh_access_token(token :str =Depends(oauth2_bearer)  , db:Session=Depends(get_db )):
+    return await refresh_token(token=token , db=db)

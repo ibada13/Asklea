@@ -12,7 +12,7 @@ export default function PatientCard({ patient }: {patient:PatientInfo}) {
           >
             <div className="flex flex-col items-center mb-6">
               <Image
-                src="https://fedskillstest.ct.digital/8.png"
+              src={ patient.profile_picture || "/pfp.jpg"}
                 alt={`${patient.username}'s profile`}
                 width={64}
                 height={64}

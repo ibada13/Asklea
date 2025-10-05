@@ -48,6 +48,7 @@ export async function deletePrivileged(route: string) {
     });
     return response.data;
   } catch (error: any) {
+    throw error
     if (Gaxios.isAxiosError(error)) {
       if (error.response?.status === 401) {
         console.warn("Unauthorized - user needs to log in");
@@ -86,7 +87,7 @@ export async function getAdmin(route: string) {
   }
 
 
-export async function post(route: string, data: any, extra_headers: Record<string, string> = {}) {
+export async function post(route: string, data?: any, extra_headers: Record<string, string> = {}) {
   
     try {
         const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null
@@ -129,21 +130,19 @@ export async function put(route: string, data: any) {
     }
 }
 
-export async function postForm(route: string, data: any) {
-  
-  try {
-      const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null
-      console.log(data)
-      const response = await axios.post(route, data, {
-          headers: {
-          Authorization: token ? `Bearer ${token}` : '',
-          'Content-Type': 'multipart/form-data',
-          },
-      })
 
-      console.log(response.data)
-      return response.data
+
+export async function postForm(route: string, data: FormData) {
+  try {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+    const response = await axios.post(route, data, {
+      headers: {
+        Authorization: token ? `Bearer ${token}` : '',
+      },
+    });
+    return response.data;
   } catch (e) {
-      console.error(e)
+    console.error(e);
+    throw e;
   }
 }

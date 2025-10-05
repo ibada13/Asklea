@@ -40,7 +40,9 @@ class Specialty(str , PyEnum):
     INTERNAL_MEDICINE = "Internal Medicine"
 
 
-class DiagnosticStatus(str, PyEnum):
+
+
+class DiagnosisStatus(str , PyEnum):
     PENDING = "pending"
-    IN_PROGRESS = "in-progress"
-    RESOLVED = "resolved"
+    IN_PROGRESS = "in_progress"
+    COMPLETED = "completed"

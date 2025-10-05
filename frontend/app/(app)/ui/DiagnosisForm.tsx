@@ -6,11 +6,6 @@ import { post } from "@/app/lib/utlis";
 const Levels = ["Low", "Normal", "Higher than Average", "High"] as const;
 type Level = typeof Levels[number];
 
-const monthNames = [
-  "January", "February", "March", "April", "May", "June",
-  "July", "August", "September", "October", "November", "December"
-];
-
 function getLevelForVital(name: string, value: number | null): Level {
   if (value === null) return "Normal";
   if (value < 50) return "Low";
@@ -19,12 +14,18 @@ function getLevelForVital(name: string, value: number | null): Level {
   return "High";
 }
 
+function getDefaultTimestamp() {
+  const now = new Date();
+  const localISO = new Date(now.getTime() - now.getTimezoneOffset() * 60000)
+    .toISOString()
+    .slice(0, 16); // "YYYY-MM-DDTHH:mm"
+  return localISO;
+}
+
 export default function DiagnosisForm({ onCloseAction, patient_id }: { onCloseAction: () => void; patient_id: string }) {
   const router = useRouter();
-  const now = new Date();
   const [formData, setFormData] = useState({
-    month: monthNames[now.getMonth()],
-    year: now.getFullYear().toString(),
+    timestamp: getDefaultTimestamp(),
     blood_pressure_systolic_value: "",
     blood_pressure_systolic_levels: "Normal" as Level,
     blood_pressure_diastolic_value: "",
@@ -52,7 +53,16 @@ export default function DiagnosisForm({ onCloseAction, patient_id }: { onCloseAc
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     try {
-      await post(`/doctor/${patient_id}/diagnosishistory`, formData);
+      const payload = {
+        ...formData,
+        timestamp: new Date(formData.timestamp).toISOString(),
+        blood_pressure_systolic_value: Number(formData.blood_pressure_systolic_value),
+        blood_pressure_diastolic_value: Number(formData.blood_pressure_diastolic_value),
+        heart_rate_value: Number(formData.heart_rate_value),
+        respiratory_rate_value: Number(formData.respiratory_rate_value),
+        temperature_value: Number(formData.temperature_value),
+      };
+      await post(`/doctor/${patient_id}/diagnosishistory`, payload);
       router.replace(window.location.pathname + "?msg=diagnostic was posted successfully");
       onCloseAction();
     } catch (error) {
@@ -61,12 +71,17 @@ export default function DiagnosisForm({ onCloseAction, patient_id }: { onCloseAc
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-6 w-full max-w-2xl mx-auto p-6 bg-white rounded shadow max-h-[400px] overflow-y-auto">
-      <div className="flex gap-4">
-        <select name="month" value={formData.month} onChange={handleChange} required className="border rounded p-2 flex-1" autoComplete="off">
-          {monthNames.map(m => <option key={m} value={m}>{m}</option>)}
-        </select>
-        <input type="number" name="year" min={1900} max={2100} value={formData.year} onChange={handleChange} required className="border rounded p-2 flex-1" />
+    <form onSubmit={handleSubmit} className="flex flex-col gap-6 w-full max-w-2xl mx-auto p-6 bg-white rounded shadow max-h-[500px] overflow-y-auto">
+      <div className="flex flex-col gap-2">
+        <label className="text-sm font-medium text-gray-700">Timestamp</label>
+        <input
+          type="datetime-local"
+          name="timestamp"
+          value={formData.timestamp}
+          onChange={handleChange}
+          required
+          className="border rounded p-2"
+        />
       </div>
 
       {[

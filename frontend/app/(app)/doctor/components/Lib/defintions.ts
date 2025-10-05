@@ -13,10 +13,10 @@ export interface patient	{
 		"lab_results":string[]
 	}
 type Level = "Normal"|"Higher than Average"|"Lower than Average"
-export interface  diagnosis_history {
+
+export interface diagnosis_history {
   id: number;
-  month: string;
-  year: number;
+  timestamp: string; 
   blood_pressure_systolic_value: number | null;
   blood_pressure_systolic_levels: Level;
   blood_pressure_diastolic_value: number | null;
@@ -29,8 +29,13 @@ export interface  diagnosis_history {
   temperature_levels: Level;
 }
 
-	export interface diagnostic_list 			{
+export type Status = "pending" | "in_progress" | "completed";
+export const StatusOptions = ["pending", "in_progress", "completed"] as const;
+
+export interface diagnostic_list 			{
+	id:number,
+		is_by_this_doc:boolean ,
 		"name": string,
 		"description": string,
-		"status": string
+		"status": Status
 	}

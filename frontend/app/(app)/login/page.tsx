@@ -1,52 +1,58 @@
-'use client'
+'use client';
+
 import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useAuth } from '@/app/hooks/auth';
+import { UseAuth } from '@/app/state/AuthProvider';
 import Loading from '../extra/Loading';
+import Auth from '@/app/hooks/useAuth';
+
 const LoginPage = () => {
-  const { login, isAuth, loading, isDoctor, isAdmin, isPatient, getUser } = useAuth();
+  const { handleLogin, role, authToken, handleGetUser } = UseAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirect = searchParams.get('redirect');
 
   useEffect(() => {
-    getUser();
+    handleGetUser();
   }, []);
 
   useEffect(() => {
-    if (isAuth) {
-      if (redirect) {
-        router.push(redirect);
-      } else if (isDoctor) {
-        router.push('/doctor');
-      } else if (isAdmin) {
-        router.push('/admin');
-      } else if (isPatient) {
-        router.push('/patient');
-      }
+    if (authToken && role) {
+      if (redirect) router.push(redirect);
+      else if (role === 'DOCTOR') router.push('/doctor');
+      else if (role === 'ADMIN') router.push('/admin');
+      else if (role === 'PATIENT') router.push('/patient');
     }
-  }, [isAuth, isDoctor, isAdmin, isPatient, redirect, router]);
+  }, [authToken, role, redirect, router]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    login(email, password).then(() => {
-      if (redirect) {
-        router.push(redirect);
-      } else if (isDoctor) {
-        router.push('/doctor');
-      } else if (isAdmin) {
-        router.push('/admin');
-      } else if (isPatient) {
-        router.push('/patient');
-      }
-    });
+    setLoading(true);
+    try {
+      const res = await handleLogin(email, password);
+
+      const userRole = res?.role || role;
+
+      if (redirect) router.push(redirect);
+      else if (userRole === 'DOCTOR') router.push('/doctor');
+      else if (userRole === 'ADMIN') router.push('/admin');
+      else if (userRole === 'PATIENT') router.push('/patient');
+    } catch (error) {
+      console.error('Login failed:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (loading) return <Loading />;
 
   return (
+    <Auth redirectIfAuth='/byrole'>
+
     <div className="min-h-screen flex items-center justify-center bg-green-50">
       <div className="bg-white shadow-lg rounded-2xl p-8 w-full max-w-md border border-green-100">
         <h2 className="text-2xl font-semibold text-green-700 mb-6 text-center">Login</h2>
@@ -55,10 +61,10 @@ const LoginPage = () => {
             type="text"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            placeholder="username"
+            placeholder="Username"
             required
             className="w-full px-4 py-2 border border-green-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-300"
-          />
+            />
           <input
             type="password"
             value={password}
@@ -66,17 +72,18 @@ const LoginPage = () => {
             placeholder="Password"
             required
             className="w-full px-4 py-2 border border-green-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-300"
-          />
+            />
           <button
             type="submit"
             disabled={loading}
             className="w-full bg-green-500 text-white py-2 rounded-lg hover:bg-green-600 transition duration-300 disabled:opacity-50"
-          >
+            >
             {loading ? 'Logging in...' : 'Login'}
           </button>
         </form>
       </div>
     </div>
+            </Auth>
   );
 };
 

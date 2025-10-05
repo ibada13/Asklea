@@ -9,7 +9,7 @@ interface Input {
 export default function TextPlaceHolder({ width, text, color , className }: Input) {
   return (
     <div
-      className={`rounded-md animate-pulse min-h-screen bg-white ${className}`}
+      className={`rounded-md animate-pulse min-h-screen bg-white text-center font-bold ${className}`}
       style={{ width}}
     >
           {text && <span className="" style={{color}}>{text}</span>}

@@ -1,9 +1,11 @@
 'use client';
+
 import { useState } from 'react';
-import { UserField } from './def/definitios';
-import { AiFillEye, AiFillEyeInvisible } from 'react-icons/ai';
-import { post } from '@/app/lib/utlis';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
+import { AiFillEye, AiFillEyeInvisible } from 'react-icons/ai';
+import { postForm } from '@/app/lib/utlis';
+import { UserField } from './def/definitios';
 
 const PostForm = ({
   userFields,
@@ -19,20 +21,42 @@ const PostForm = ({
   const [formData, setFormData] = useState<Record<string, string>>(
     Object.fromEntries(userFields.map((f) => [f.name, '']))
   );
+  const [image, setImage] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    if (e.target.type === 'file') {
+      const fileInput = e.target as HTMLInputElement;
+      const file = fileInput.files?.[0];
+
+      if (file && file.type === 'image/jpeg') {
+        setImage(file);
+        setImagePreview(URL.createObjectURL(file));
+      } else {
+        alert('Only JPG images are allowed.');
+        e.target.value = '';
+      }
+    } else {
+      setFormData({ ...formData, [e.target.name]: e.target.value });
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const data = new FormData();
+    Object.entries(formData).forEach(([key, value]) => data.append(key, value));
+    if (image) data.append('image', image);
+
     try {
-      const response  = await post(route, formData);
+      const response = await postForm(route, data);
       router.push(`${redirect}/${response.id}?msg=User has been created`);
     } catch (err) {
-      console.log(err);
+      router.push(
+        `${location.pathname}?msg=${String((err as any).response?.data?.detail || 'Submission failed')}&&color=red`,
+        { scroll: false }
+      );
     }
   };
 
@@ -75,7 +99,6 @@ const PostForm = ({
                   onClick={() => setShowPassword((v) => !v)}
                   className="absolute right-3 top-8 text-gray-500 hover:text-sg focus:outline-none"
                   tabIndex={-1}
-                  aria-label={showPassword ? 'Hide password' : 'Show password'}
                 >
                   {showPassword ? <AiFillEyeInvisible size={20} /> : <AiFillEye size={20} />}
                 </button>
@@ -92,12 +115,41 @@ const PostForm = ({
             )}
           </div>
         ))}
+
+        <div className="flex flex-col">
+          <label className="text-sm font-medium text-gray-700 mb-1">Profile Image</label>
+          <input
+            type="file"
+            name="image"
+            accept=".jpg,image/jpeg"
+            onChange={handleChange}
+            className="border border-gray-300 px-4 py-2 rounded-lg focus:ring-2 focus:ring-sg focus:outline-none"
+          />
+
+          {imagePreview && (
+            <div className="mt-4">
+              <p className="text-sm text-gray-600 mb-2">Image Preview:</p>
+              <div className="relative w-32 h-32 rounded-lg overflow-hidden border border-gray-300">
+                <Image
+                  src={imagePreview}
+                  alt="Image Preview"
+                  layout="fill"
+                  objectFit="cover"
+                />
+              </div>
+            </div>
+          )}
+        </div>
       </div>
 
       <div className="flex justify-end gap-4">
         <button
           type="reset"
-          onClick={() => setFormData(Object.fromEntries(userFields.map((f) => [f.name, ''])))}
+          onClick={() => {
+            setFormData(Object.fromEntries(userFields.map((f) => [f.name, ''])));
+            setImage(null);
+            setImagePreview(null);
+          }}
           className="bg-gray-300 text-gray-800 px-6 py-2 rounded-lg hover:bg-gray-400 transition"
         >
           Reset

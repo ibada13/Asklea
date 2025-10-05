@@ -1,52 +1,58 @@
 'use client'
 
-import { useSelector } from "react-redux"
-import { RootState } from "../state/store"
+import { UseAuth } from "../state/AuthProvider"
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-
+import Loading from "../(app)/extra/Loading"
 interface Params {
   redirectIfAuth?: string
   middleware?: 'admin' | 'doctor' | 'patient'
   children: React.ReactNode
 }
 
-export default function UseAuth({ redirectIfAuth, middleware, children }: Params) {
-  const { isAdmin, isDoctor, isPatient, loading } = useSelector((state: RootState) => state.auth)
+export default function Auth({ redirectIfAuth, middleware, children }: Params) {
   const router = useRouter()
   const [checked, setChecked] = useState(false)
+  const { role, handleGetUser } = UseAuth()
 
   useEffect(() => {
-    if (loading) return
+    handleGetUser()
+  }, [])
 
-    const isAuthenticated = isAdmin || isDoctor || isPatient
+  useEffect(() => {
+    if (role === undefined) return
 
-    if (isAuthenticated) {
+    if (role) {
       if (
-        (middleware === 'admin' && !isAdmin) ||
-        (middleware === 'doctor' && !isDoctor) ||
-        (middleware === 'patient' && !isPatient)
+        (middleware === 'admin' && role !== "ADMIN") ||
+        (middleware === 'doctor' && role !== "DOCTOR") ||
+        (middleware === 'patient' && role !== "PATIENT")
       ) {
         router.push('/unauthorized')
         return
       }
 
       if (redirectIfAuth) {
-        router.push(redirectIfAuth)
+        if (redirectIfAuth === '/byrole') {
+          if (role === 'ADMIN') router.push('/admin')
+          else if (role === 'DOCTOR') router.push('/doctor')
+          else if (role === 'PATIENT') router.push('/patient')
+        } else {
+          router.push(redirectIfAuth)
+        }
         return
       }
     } else {
       const current = window.location.pathname + window.location.search
-      router.push(`/login?redirect=${encodeURIComponent(current)}`)
-      return
+      if (!window.location.pathname.startsWith('/login')) { 
+        router.push(`/login?redirect=${encodeURIComponent(current)}`)
+      }
     }
 
-    setChecked(true)
-  }, [loading, isAdmin, isDoctor, isPatient, middleware, redirectIfAuth])
+    setChecked(true);
+  }, [role, middleware, redirectIfAuth, router])
 
-  if (loading || !checked) {
-    return <div>Loading...</div>
-  }
+  if (!checked) return <Loading/>
 
   return <>{children}</>
 }

@@ -13,12 +13,11 @@
     { name: 'office_location', label: 'Office Location', type: 'text' },
 ];
   
-
-export const patientFields: UserField[] = [
-  ...userFields,
+export const patientoriginalfields: UserField[] = [
+    { name: "username", type: "text", label: "Username" },
   { name: "gender", label: "Gender", type: "select", options: ["Male", "Female"] },
   { name: "age", label: "Age", type: "number" },
-  { name: "profile_picture", label: "Profile Picture", type: "text" },
+  // { name: "profile_picture", label: "Profile Picture", type: "text" },
   { name: "date_of_birth", label: "Date of Birth", type: "date" },
   { name: "phone_number", label: "Phone Number", type: "text" },
   { name: "emergency_contact", label: "Emergency Contact", type: "text" },
@@ -29,4 +28,8 @@ export const patientFields: UserField[] = [
     options: ["Premier Auto Corporation", "Blue Cross Blue Shield", "Aetna", "Cigna", "United Healthcare", "Humana", "Other"]
 ,
   },
+]
+export const patientFields: UserField[] = [
+  ...userFields,
+  ...patientoriginalfields
 ];

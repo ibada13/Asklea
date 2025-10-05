@@ -9,13 +9,15 @@ const EditForm = ({
   title,
   userdata = {},
   route,
-  redirect 
+  redirect,
+  msg
 }: {
   userFields: UserField[];
   title: string;
     userdata?: Record<string, string>;
     route: string
-  redirect:string
+    redirect: string
+  msg:string
 }) => {
   const [formData, setFormData] = useState<Record<string, string>>(
     Object.fromEntries(userFields.map((f) => [f.name, userdata[f.name] || '']))
@@ -30,8 +32,10 @@ const EditForm = ({
     e.preventDefault();
     try { 
      await put(route, formData )
-      router.push(redirect + "?msg=user infos has been edited")
+      router.push(redirect + `?msg=${msg}`)
     } catch (err) {
+      router.push(redirect + "?msg=some error occured&color=red")
+
       console.log(err)
      }
     console.log(formData);

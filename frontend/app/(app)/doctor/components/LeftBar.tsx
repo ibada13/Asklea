@@ -6,19 +6,29 @@ import useSWRImmutable from 'swr/immutable';
 import { useDebounce } from 'use-debounce';
 import { IoSearch } from 'react-icons/io5';
 import { IoMdClose } from 'react-icons/io';
-import PatientForList from '../../ui/patientsforlist';
-import { PatientforListType } from '../types/types';
+
+
 import { getPrivliged } from '@/app/lib/utlis';
+import PatientforList from '../../ui/patientsforlist';
+import { PatientforListType } from '../../types/types';
 
 const LeftBar = ({ selected }: { selected?: string }) => {
   const [searching, setSearching] = useState(false);
   const [query, setQuery] = useState('');
   const [debounced] = useDebounce(query, 300);
 
-  const { data, error, isLoading } = useSWRImmutable(
+  const { data, error, isLoading } = useSWR<PatientforListType[]>(
     debounced ? `/doctor/my-patients?name=${debounced}` : '/doctor/my-patients',
     getPrivliged,
-    { keepPreviousData: true }
+    {
+      keepPreviousData: true,
+      revalidateOnFocus: true, 
+          revalidateOnReconnect: false,
+    refreshWhenOffline: false,
+    refreshWhenHidden: false,
+    refreshInterval: 0,
+      
+     }
   );
 
   return (
@@ -48,7 +58,7 @@ const LeftBar = ({ selected }: { selected?: string }) => {
             key={p.id}
             className={`${selected === p.id ? 'bg-gray-200' : ''} rounded-lg cursor-pointer`}
           >
-            <PatientForList id={p.id} patient={p} />
+            <PatientforList  user={p} />
           </div>
         ))}
       </div>
