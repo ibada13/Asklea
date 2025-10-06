@@ -4,8 +4,9 @@ import { MdCancel } from "react-icons/md";
 import Link from "next/link"
 import React, { useState } from "react"
 import { deletePrivileged } from "@/app/lib/utlis";
+import { TbMessageOff ,TbMessage} from "react-icons/tb";
 import { useRouter } from "next/navigation";
-export default function Oparations({ username , id ,edithref}: {username:string ,id:string ,edithref:string}) { 
+export default function Oparations({ username , can_message , id ,edithref}: {username:string , can_message:boolean ,id:string ,edithref:string}) { 
 
     const [delPanel, SetDelPanel] = useState<boolean>(false);
     const [disabled, SetDisabled] = useState<boolean>(true);
@@ -31,6 +32,12 @@ export default function Oparations({ username , id ,edithref}: {username:string 
     return (
                 <div className='w-full  p-2 flex justify-end text-gray-400' >
                     <div className='flex gap-x-8'>
+                <button type="button" onClick={() => SetDelPanel(true)}>{
+                    can_message?
+                    <TbMessage className='text-emerald-400 hover:text-red-500 transition-colors duration-300' size={35}/>
+                    :
+                    <TbMessageOff className='text-red-300 hover:text-emerald-400 transition-colors duration-300' size={35} />
+                    }</button>
                     <button type="button" onClick={()=>SetDelPanel(true)}><FaTrash className='hover:text-red-500 transition-colors duration-300'  size={30}/></button>
                 <Link href={ edithref}><FaEdit className='hover:text-sg transition-colors duration-300' size={30}/></Link>
             </div>

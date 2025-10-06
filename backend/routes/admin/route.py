@@ -146,7 +146,8 @@ def get_patient(
             Patient.date_of_birth,
             Patient.phone_number,
             Patient.emergency_contact,
-            Patient.insurance_type
+            Patient.insurance_type,
+            Patient.can_send_messages
         )
     ).filter(Patient.id == patient_id).first()
 

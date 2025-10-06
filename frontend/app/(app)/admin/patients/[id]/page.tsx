@@ -22,6 +22,7 @@ interface PatientType {
   phone_number?: string;
   emergency_contact?: string;
   insurance_type: string;
+  can_send_messages: boolean;
 }
 
 export default function PatientProfile() {
@@ -35,7 +36,7 @@ export default function PatientProfile() {
   return (
     <div className="w-full min-h-screen flex flex-col items-center p-6 bg-gray-50">
       <div className="max-w-4xl w-full bg-white rounded-xl shadow-lg p-8">
-                <Oparations edithref={`/admin/patients/${id}/edit`} id={ patient.id} username={ patient.username } />
+        <Oparations can_message={ patient.can_send_messages} edithref={`/admin/patients/${id}/edit`} id={ patient.id} username={ patient.username } />
         <div className="flex justify-center mb-8">
           <Image
             src={ patient?.profile_picture||"/pfp.jpg"}
